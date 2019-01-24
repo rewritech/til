@@ -27,16 +27,21 @@ ALTER TABLE dbo.MyTable ALTER COLUMN CharCol
   varchar(10)COLLATE Japanese_CS_AS_KS_WS NOT NULL;  
 GO  
 ```
->参照：https://docs.microsoft.com/ja-jp/sql/relational-databases/collations/set-or-change-the-column-collation?view=sql-server-2016
+> ###### 参照：[列の照合順序の設定または変更](https://docs.microsoft.com/ja-jp/sql/relational-databases/collations/set-or-change-the-column-collation?view=sql-server-2016 "microsoft公式サイト")
+
+    
     
 キーワード | 意味
------------- | -------------
+--- | ---
 CS | アルファベットの大文字・小文字の区分  
 AS | アルファベットの上のアクセントのようなことの区分  
 KS | 日本語のカタカナ・ひらがなの区分  
 WS | 日本語の全角・半角の区分  
   
+  
 キーワード | 意味
------------- | -------------
+--- | ---
 S | センシティブ（sensitive）で区分
-I | インセンシティブ（insensitive）で区分しない
+I | インセンシティブ（insensitive）で区分しない  
+
+
