@@ -29,10 +29,14 @@ GO
 
 >参照：https://docs.microsoft.com/ja-jp/sql/relational-databases/collations/set-or-change-the-column-collation?view=sql-server-2016
   
-CS：アルファベットの大文字・小文字の区分  
-AS：アルファベットの上のアクセントのようなことの区分  
-KS：日本語のカタカナ・ひらがなの区分  
-WS：日本語の全角・半角の区分  
-  
-Sはセンシティブ（sensitive）で区分する意味で、  
-Iはインセンシティブ（insensitive）で区分しない意味です。  
+キーワード | 意味
+------------ | -------------
+CS | アルファベットの大文字・小文字の区分  
+AS | アルファベットの上のアクセントのようなことの区分  
+KS | 日本語のカタカナ・ひらがなの区分  
+WS | 日本語の全角・半角の区分  
+
+キーワード | 意味
+------------ | -------------
+S | センシティブ（sensitive）で区分
+I | インセンシティブ（insensitive）で区分しない
