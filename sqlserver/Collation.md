@@ -14,6 +14,7 @@
 区分の必要なテーブルのカラムにだけ属性を変える方がいいです。
 下記はカラムの照合順位の変更のSQLです。
 
+'''
 CREATE TABLE dbo.MyTable  
   (PrimaryKey   int PRIMARY KEY,  
    CharCol      varchar(10) COLLATE NOT NULL  
@@ -22,6 +23,8 @@ GO
 ALTER TABLE dbo.MyTable ALTER COLUMN CharCol  
             varchar(10)COLLATE Japanese_CS_AS_KS_WS NOT NULL;  
 GO  
+'''
+
 参照＞https://docs.microsoft.com/ja-jp/sql/relational-databases/collations/set-or-change-the-column-collation?view=sql-server-2016
 
 CS；アルファベットの大文字・小文字の区分
