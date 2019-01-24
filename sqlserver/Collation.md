@@ -16,7 +16,7 @@
 区分の必要なテーブルのカラムにだけ属性を変える方がいいです。  
 下記はカラムの照合順位の変更のSQLです。  
 
-```sqlserver
+```SQL
 CREATE TABLE dbo.MyTable  
   (PrimaryKey   int PRIMARY KEY,  
    CharCol      varchar(10) COLLATE NOT NULL  
