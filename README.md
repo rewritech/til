@@ -1,2 +1,8 @@
 # til
-today I learned
+> today I learned
+
+1. 働きながら学んだ内容を中心に書きます。
+    1. 2018年～：python 3.5, Django1.11, sqlserver
+1. 簡単なコードも書きます。
+1. 内容は日本語で書きます。
+1. どうぞよろしくお願い致します。
