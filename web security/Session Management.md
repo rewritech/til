@@ -20,13 +20,18 @@
     ```
     > ###### 参考：[flush() Django公式サイト](https://docs.djangoproject.com/en/1.11/topics/http/sessions/#django.contrib.sessions.backends.base.SessionBase.flush)
 1. #### セッションの時間を短くします。（クッキーかセッションか調査必要）
-    ```python
-    #pythonのDjangoではset_expiry(time)で時間設定できます。
-    def set_sessionTime(request):
-        time = 5*60*60 # 時間 * 分 * 秒
-        request.session.set_expiry(time)
-        session_age = request.session.get_expiry_age()
-        print(session_age)
-        # > 1800
-    ```
-  
+    1. session.set_expiry(time)
+        ```python
+        #pythonのDjangoではset_expiry(time)で時間設定できます。
+        def set_sessionTime(request):
+            time = 3 * 60 * 60  # 時間 * 分 * 秒
+            request.session.set_expiry(time)
+            session_age = request.session.get_expiry_age()
+            print(session_age)
+            # > 1800
+        ```
+    1. settings.pyでSESSION_COOKIE_AGE設定
+        ```python
+        # 途中に接続しても、削除する。（set_expiryは確認必要）
+        SESSION_COOKIE_AGE = 3 * 60 * 60
+        ```
