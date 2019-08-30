@@ -44,4 +44,25 @@ Try to get it to O(n) time complexity!
 ## Answer
 
 ```javascript
+const input = ["Bob", "Ross", "Guy", "Taco", "Waffles", "Ross", "Felix", "Felix", "Waffles"];
+const inputLength = input.length;
+const duplicatedFlags = input.map(() => false);
+for (let i = 0; i < inputLength; i++) {
+  const currentValue = input[i];
+
+  for (let j = i + 1; j < inputLength; j++) {
+    if (currentValue === input[j]) {
+      duplicatedFlags[j] = true;
+    }
+  }
+}
+console.log(duplicatedFlags); // [false, false, false, false, false, true, false, true, true]
+
+const result = [];
+for (let i = 0; i < inputLength; i++) {
+  if (!duplicatedFlags[i]) {
+    result.push(input[i]);
+  }
+}
+console.log(result); // ["Bob", "Ross", "Guy", "Taco", "Waffles", "Felix"]
 ```
