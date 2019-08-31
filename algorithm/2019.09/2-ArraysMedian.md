@@ -36,5 +36,13 @@ The best I time complexity I could come up with is O(n)
 
 ## practice
 ```javascript
+const input1 = [1, 1, 2, 2, 6];
+const input2 = [4, 7, 7, 8];
 
+const uniqueInputs = [...new Set(input1.concat(input2))];
+uniqueInputs.sort();
+
+const midian = parseInt(uniqueInputs.length / 2, 10);
+const result = uniqueInputs[midian];
+console.log(result);  // 6
 ```
