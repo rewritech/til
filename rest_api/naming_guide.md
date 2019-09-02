@@ -64,3 +64,55 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
     * Practice
     http://www.service.com/rooms/100/users/{id}/reservations/cancel
     ```
+
+
+Consistency is the key
+---
+> Use consistent resource naming conventions and URI formatting for minimum ambiguily and maximum readability and maintainability. You may implement below design hints to achieve consistency:
+
+  #### 1. Use forward slash (/) to indicate a hierarchical relationships
+  * The forward slash (/) character is used in the path portion of the URI to indicate a hierarchical relationship between resources.
+    ```
+    * Example
+    http://api.example.com/device-management
+    http://api.example.com/device-management/managed-devices
+    http://api.example.com/device-management/managed-devices/{id}
+    http://api.example.com/device-management/managed-devices/{id}/scripts
+    http://api.example.com/device-management/managed-devices/{id}/scripts/{id}
+    
+    * Practice
+    http://www.service.com/rooms/100/furnichures
+    ```
+  #### 2. Do not use trailing forward slash (/) in URIs
+  * As the last character within a URI’s path, a forward slash (/) adds no semantic value and may cause confusion.
+  * It’s better to drop them completely.
+    ```
+    * Example
+    http://api.example.com/device-management/managed-devices/
+    http://api.example.com/device-management/managed-devices 	/*This is much better version*/
+    
+    * Practice
+    http://www.service.com/rooms/100/furnichures/beds
+    ```
+
+  #### 3. Use hyphens (-) to improve the readability of URIs
+  * To make your URIs easy for people to scan and interpret, use the hyphen (-) character to improve the readability of names in long path segments.
+    ```
+    * Example
+    http://api.example.com/inventory-management/managed-entities/{id}/install-script-location  //More readable
+    http://api.example.com/inventory-management/managedEntities/{id}/installScriptLocation  //Less readable
+    
+    * Practice
+    http://www.service.com/rooms/100/furnichures/beds/king-size
+    ```
+    
+  #### 4. Do not use underscores ( _ )
+  * It’s possible to use an underscore in place of a hyphen to be used as separator. But!
+  * Depending on the application’s font, it’s possible that the underscore (_) character can either get partially obscured or completely hidden in some browsers or screens.
+
+    #### To avoid this confusion, use hyphens (-) instead of underscores ( _ ).
+    ```
+    * Example
+    http://api.example.com/inventory-management/managed-entities/{id}/install-script-location  //More readable
+    http://api.example.com/inventory_management/managed_entities/{id}/install_script_location  //More error prone
+    ```
