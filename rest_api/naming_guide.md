@@ -65,7 +65,7 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
     http://www.service.com/rooms/100/users/{id}/reservations/cancel
     ```
 
-
+ 
 Consistency is the key
 ---
 > Use consistent resource naming conventions and URI formatting for minimum ambiguily and maximum readability and maintainability. You may implement below design hints to achieve consistency:
@@ -83,6 +83,7 @@ Consistency is the key
     * Practice
     http://www.service.com/rooms/100/furnichures
     ```
+
   #### 2. Do not use trailing forward slash (/) in URIs
   * As the last character within a URI’s path, a forward slash (/) adds no semantic value and may cause confusion.
   * It’s better to drop them completely.
@@ -105,11 +106,10 @@ Consistency is the key
     * Practice
     http://www.service.com/rooms/100/furnichures/beds/king-size
     ```
-    
+  
   #### 4. Do not use underscores ( _ )
   * It’s possible to use an underscore in place of a hyphen to be used as separator. But!
   * Depending on the application’s font, it’s possible that the underscore (_) character can either get partially obscured or completely hidden in some browsers or screens.
-
     #### To avoid this confusion, use hyphens (-) instead of underscores ( _ ).
     ```
     * Example
