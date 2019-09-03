@@ -116,3 +116,31 @@ Consistency is the key
     http://api.example.com/inventory-management/managed-entities/{id}/install-script-location  //More readable
     http://api.example.com/inventory_management/managed_entities/{id}/install_script_location  //More error prone
     ```
+
+  #### 5. Use lowercase letters in URIs
+  * When convenient, lowercase letters should be consistently preferred in URI paths.
+    #### RFC 3986 defines URIs as case-sensitive except for the scheme and host components.
+    ```
+    * Example
+    http://api.example.org/my-folder/my-doc  //1 (O)
+    HTTP://API.EXAMPLE.ORG/my-folder/my-doc  //2 (O)
+    http://api.example.org/My-Folder/my-doc  //3 (X)
+
+    1. Scheme: The scheme identifies the protocol to be used to access the resource on the Internet. It can be HTTP (without SSL) or HTTPS (with SSL).
+      => In here 'HTTP' is scheme
+    2. Host: The host name identifies the host that holds the resource.
+      => In here 'api.example.org' is host
+    ```
+    > In above examples, 1 and 2 are same but 3 is not as it uses My-Folder in capital letters.
+
+  #### 6. Do not use file extenstions
+  * File extensions look bad and do not add any advantage.
+  * Removing them decrease the length of URIs as well.
+  * No reason to keep them.
+    #### Apart from above reason, if you want to highlight the media type of API using file extenstion then you should rely on the media type, as communicated through the [Content-Type header], to determine how to process the body’s content.
+    ```
+    * Example
+    http://api.example.com/device-management/managed-devices.xml  /*Do not use it*/
+    http://api.example.com/device-management/managed-devices 	/*This is correct URI*/
+      => Need to communicate through the [Content-Type header]
+    ```
