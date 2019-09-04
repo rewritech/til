@@ -144,3 +144,23 @@ Consistency is the key
     http://api.example.com/device-management/managed-devices 	/*This is correct URI*/
       => Need to communicate through the [Content-Type header]
     ```
+
+Never use CRUD function names in URIs
+---
+  #### URIs should not be used to indicate that a CRUD function is performed.
+  #### URIs should be used to uniquely identify resources and not any action upon them.
+  #### HTTP request methods should be used to indicate which CRUD function is performed.
+    ```
+    * Example
+    HTTP GET http://api.example.com/device-management/managed-devices  //Get all devices
+    HTTP POST http://api.example.com/device-management/managed-devices  //Create new Device
+
+    HTTP GET http://api.example.com/device-management/managed-devices/{id}  //Get device for given Id
+    HTTP PUT http://api.example.com/device-management/managed-devices/{id}  //Update device for given Id
+    HTTP DELETE http://api.example.com/device-management/managed-devices/{id}  //Delete device for given Id
+    
+    GET: Get Info
+    POST: Create Data
+    PUT: Update Data -> PATCH?
+    DELETE: Delete Data
+    ```
