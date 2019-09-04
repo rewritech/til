@@ -3,7 +3,7 @@ Use nouns to represent resources
 link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
 > 
 
-  ####  1. collection
+  ####  1. document
   * A document resource is a singular concept.
   * Like an object instance or database record.
   * View it as a single resource inside resource collection.
@@ -147,9 +147,9 @@ Consistency is the key
 
 Never use CRUD function names in URIs
 ---
-  #### URIs should not be used to indicate that a CRUD function is performed.
-  #### URIs should be used to uniquely identify resources and not any action upon them.
-  #### HTTP request methods should be used to indicate which CRUD function is performed.
+  * URIs should not be used to indicate that a CRUD function is performed.
+  * URIs should be used to uniquely identify resources and not any action upon them.
+  * HTTP request methods should be used to indicate which CRUD function is performed.
     ```
     * Example
     HTTP GET http://api.example.com/device-management/managed-devices  //Get all devices
@@ -158,7 +158,7 @@ Never use CRUD function names in URIs
     HTTP GET http://api.example.com/device-management/managed-devices/{id}  //Get device for given Id
     HTTP PUT http://api.example.com/device-management/managed-devices/{id}  //Update device for given Id
     HTTP DELETE http://api.example.com/device-management/managed-devices/{id}  //Delete device for given Id
-    
+
     GET: Get Info
     POST: Create Data
     PUT: Update Data -> PATCH?
