@@ -164,3 +164,19 @@ Never use CRUD function names in URIs
     PUT: Update Data -> PATCH?
     DELETE: Delete Data
     ```
+
+Use query component to filter URI collection
+---
+> Many times, you will come across requirements where you will need a collection of resources sorted, filtered or limited based on some certain resource attribute. For this, do not create new APIs – rather enable sorting, filtering and pagination capabilities in resource collection API and pass the input parameters as query parameters. e.g.
+
+  * a collection of resources sorted, filtered or limited passes the input parameters
+    ```
+    * Example
+    http://api.example.com/device-management/managed-devices
+    http://api.example.com/device-management/managed-devices?region=USA
+    http://api.example.com/device-management/managed-devices?region=USA&brand=XYZ
+    http://api.example.com/device-management/managed-devices?region=USA&brand=XYZ&sort=installation-date
+    
+    * Practice
+    http://www.service.com/rooms/100/devices?sort=acs&kind=electronics
+    ```
