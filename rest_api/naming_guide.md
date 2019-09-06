@@ -1,7 +1,23 @@
+REST Resource Naming Best Practices
+===
+
 Use nouns to represent resources
 ---
 link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
-> 
+> RESTful URI should refer to a resource that is a thing (noun) instead of referring to an action (verb) because nouns have properties which verbs do not have – similar to resources have attributes. Some examples of a resource are:
+  * Users of the system
+  * User Accounts
+  * Network Devices etc.
+    #### and their resource URIs can be designed as below:
+    ```
+    * example
+    http://api.example.com/device-management/managed-devices 
+    http://api.example.com/device-management/managed-devices/{device-id} 
+    http://api.example.com/user-management/users/
+    http://api.example.com/user-management/users/{id}
+    ```
+    > For more clarity, let’s divide the resource archetypes into four categories (document, collection, store and controller) and then you should always target to put a resource into one archetype and then use it’s naming convention consistently. For uniformity’s sake, resist the temptation to design resources that are hybrids of more than one archetype.
+
 
   ####  1. document
   * A document resource is a singular concept.
