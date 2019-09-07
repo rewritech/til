@@ -35,6 +35,7 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
    http://www.service.com/skills/javascript
    http://www.service.com/rooms/100
    ```
+    > 서비스로 관리하는 특정 하나의 데이터로 이해하자. 
 
  ####  2. collection
  * A collection resource is a server-managed directory of resources.
@@ -52,6 +53,7 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
    http://www.service.com/skills/javascript/functions
    http://www.service.com/rooms/100/devices
    ```
+    > 서비스로 관리하는 데이터 집단으로 이해하자. 
 
  ####  3. store
  * A store is a client-managed resource repository.
@@ -67,6 +69,7 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
    * Practice
    http://www.service.com/rooms/100/users/{id}/reservations
    ```
+    > 유저가 관리하는 데이터 집단으로 이해하자. 
 
  ####  4. controller
  * A controller resource models a procedural concept.
@@ -80,6 +83,7 @@ link: [REST API TUTORIAL](https://restfulapi.net/resource-naming/)
    * Practice
    http://www.service.com/rooms/100/users/{id}/reservations/cancel
    ```
+    > 특정 절차 표시로 이해하자. (데이터 생성, 조회, 수정, 삭제 이외)
 
 
 Consistency is the key
