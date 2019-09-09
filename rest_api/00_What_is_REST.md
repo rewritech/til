@@ -25,3 +25,24 @@ The layered system style allows an architecture to be composed of hierarchical l
 
 1. **Code on demand (optional)**  
 REST allows client functionality to be extended by downloading and executing code in the form of applets or scripts. This simplifies clients by reducing the number of features required to be pre-implemented.
+
+Resource
+---  
+* The key abstraction of information in REST is a resource.
+  * Any information that can be named can be a resource.
+    * a document or image, a temporal service, a collection of other resources, a non-virtual object (e.g. a person).
+  * REST uses a resource identifier to identify the particular resource involved in an interaction between components.
+
+* The state of resource at any particular timestamp is known as resource representation.
+  * A representation consists of
+    * data
+    * metadata describing the data
+    * hypermedia links which can help the clients in transition to next desired state.
+
+* The data format of a representation is known as a media type.
+  * The media type identifies a specification that defines how a representation is to be processed.
+  * A truly RESTful API looks like hypertext.
+  * Every addressable unit of information carries
+    * an address
+    * either explicitly (e.g., link and id attributes)
+      * or implicitly (e.g., derived from the media type definition and representation structure)
