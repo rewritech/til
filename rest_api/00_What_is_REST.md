@@ -1,6 +1,6 @@
 What is REST
 ===
-link: [REST API TUTORIAL](https://restfulapi.net/)
+link: [What is REST](https://restfulapi.net/)
 > REST is acronym for REpresentational State Transfer.  
 REST has it’s own 6 guiding constraints which must be satisfied if an interface needs to be referred as RESTful.  
 These principles are listed below.
@@ -46,3 +46,16 @@ Resource
     * an address
     * either explicitly (e.g., link and id attributes)
       * or implicitly (e.g., derived from the media type definition and representation structure)
+
+Resource Methods
+---
+* resource methods to be used to perform the desired transition.
+  * A large number of people wrongly relate resource methods to HTTP GET/PUT/POST/DELETE methods.
+
+* Roy Fielding has never mentioned any recommendation around which method to be used in which condition.
+  * All he emphasizes is that it should be uniform interface.
+  * If you decide HTTP POST will be used for updating a resource, it’s alright and application interface will be RESTful.
+  (most people recommend HTTP PUT)
+
+* Ideally, everything that is needed to change the resource state shall be part of API response for that resource
+  * including methods and in what state they will leave the representation.
