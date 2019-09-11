@@ -59,3 +59,30 @@ Resource Methods
 
 * Ideally, everything that is needed to change the resource state shall be part of API response for that resource
   * including methods and in what state they will leave the representation.
+
+REST and HTTP are not same !!
+---
+#### A lot of people prefer to compare HTTP with REST. REST and HTTP are not same.
+> REST != HTTP
+* Roy fielding, in his dissertation, nowhere mentioned any implementation directive
+  * including any protocol preference and HTTP.
+* Till the time, you are honoring the 6 guiding principles of REST, you can call your interface RESTful.
+
+* In simplest words, in the REST architectural style, data and functionality
+  * are considered resources
+  * are accessed using Uniform Resource Identifiers (URIs)
+* The resources are acted upon by using a set of simple, well-defined operations.
+* The clients and servers exchange representations of resources by using a standardized interface and protocol.
+  * typically HTTP
+
+* Resources are decoupled from their representation so that their content can be accessed in a variety of formats
+  * such as HTML, XML, plain text, PDF, JPEG, JSON, and others.
+* Metadata about the resource is available and used
+  * for example
+    1. control caching  
+    1. detect transmission errors  
+    1. negotiate the appropriate representation format  
+    1. perform authentication or access control.  
+  * And most importantly, every interaction with a resource is stateless.
+
+* All these principles help RESTful applications to be simple, lightweight, and fast.
