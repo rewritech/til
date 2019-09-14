@@ -35,3 +35,18 @@ As the constraint name itself applies, you MUST decide APIs interface for resour
   * such as HTTP GET and similarly modified using a consistent approach.
 
 > Once a developer becomes familiar with one of your API, he should be able to follow the similar approach for other APIs.
+
+Stateless
+-—-
+* Roy fielding got inspiration from HTTP, so it reflects in this constraint.
+  * Make all client-server interaction stateless.
+  * Server will not store anything about latest HTTP request client made.
+  * It will treat each and every request as new.
+  * No session, no history.
+
+* If client application needs to be a stateful application for the end user, where user logs in once and do other authorized operations thereafter,
+  then each request from the client should contain all the information necessary to service the request
+  * including authentication and authorization details.
+
+> No client context shall be stored on the server between requests.
+The client is responsible for managing the state of the application.
