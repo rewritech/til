@@ -37,7 +37,7 @@ As the constraint name itself applies, you MUST decide APIs interface for resour
 > Once a developer becomes familiar with one of your API, he should be able to follow the similar approach for other APIs.
 
 Stateless
--—-
+---
 * Roy fielding got inspiration from HTTP, so it reflects in this constraint.
   * Make all client-server interaction stateless.
   * Server will not store anything about latest HTTP request client made.
@@ -50,3 +50,16 @@ Stateless
 
 > No client context shall be stored on the server between requests.
 The client is responsible for managing the state of the application.
+
+Cacheable
+---
+* In today’s world, caching of data and responses is of utmost important wherever they are applicable/possible.
+  * The webpage you are reading here is also a cached version of the HTML page.
+  * Caching brings performance improvement for client side
+    * And better scope for scalability for a server because the load has reduced.
+
+* In REST, caching shall be applied to resources when applicable
+  * And then these resources MUST declare themselves cacheable.
+    * Caching can be implemented on the server or client side.
+
+> Well-managed caching partially or completely eliminates some client-server interactions, further improving scalability and performance.
