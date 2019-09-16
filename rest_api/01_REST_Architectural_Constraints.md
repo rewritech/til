@@ -63,3 +63,12 @@ Cacheable
     * Caching can be implemented on the server or client side.
 
 > Well-managed caching partially or completely eliminates some client-server interactions, further improving scalability and performance.
+
+Layered system
+---
+* REST allows you to use a layered system architecture.
+  * For example, You deploy the APIs on server A
+  * And store data on server B
+  * And authenticate requests in Server C.
+    * A client cannot ordinarily tell whether it is connected directly to the end server
+    * Or to an intermediary along the way.
