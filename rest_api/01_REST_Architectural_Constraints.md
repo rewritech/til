@@ -72,3 +72,11 @@ Layered system
   * And authenticate requests in Server C.
     * A client cannot ordinarily tell whether it is connected directly to the end server
     * Or to an intermediary along the way.
+
+Code on demand (optional)
+---
+* Most of the time you will be sending the static representations of resources in form of XML or JSON.
+* But when you need to, you are free to return executable code to support a part of your application
+  * clients may call your API to get a UI widget rendering code. It is permitted.
+
+> All above constraints help you build a truly RESTful API and you should follow them. Still, at times you may find yourself violating one or two constraints. Do not worry, you are still making a RESTful API – but not “truly RESTful”.
