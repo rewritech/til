@@ -17,3 +17,14 @@ If none of the caches can satisfy the request
 1. Reduce latency
 1. Reduce load on servers
 1. Hide network failures
+
+Caching in REST APIs
+---
+* Being cacheable is one of architectural constraints of REST.
+  * GET requests should be cachable by default – until special condition arises.
+    * Usually, browsers treat all GET requests cacheable.
+  * POST requests are not cacheable by default
+    * But can be made cacheable if either an Expires header or a Cache-Control header with a directive, to explicitly allows caching, is added to the response.
+  * Responses to PUT and DELETE requests are not cacheable at all.
+
+There are two main HTTP response headers that we can use to control caching behavior:
