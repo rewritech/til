@@ -28,3 +28,14 @@ Caching in REST APIs
   * Responses to PUT and DELETE requests are not cacheable at all.
 
 There are two main HTTP response headers that we can use to control caching behavior:
+
+### Expires
+* The Expires HTTP header specifies an absolute expiry time for a cached representation.
+  * Beyond that time,
+    * a cached representation is considered stale
+    * and must be re-validated with the origin server.
+  * To indicate that a representation never expires,
+    * A service can include a time up to one year in the future.
+```
+Expires: Sun, 20 Sep 2020 23:38:20 IST
+```
