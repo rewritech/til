@@ -39,3 +39,13 @@ There are two main HTTP response headers that we can use to control caching beha
 ```
 Expires: Sun, 20 Sep 2020 23:38:20 IST
 ```
+
+### Cache-Control
+* The header value comprises one or more comma-separated directives.
+  * These directives determine whether a response is cacheable
+    * and if so, by whom, and for how long e.g. max-age or s-maxage directives.
+‘’’
+Cache-Control: max-age=3600
+‘’’
+* Cacheable responses (whether to a GET or to a POST request) should also include a validator
+  * either an ETag or a Last-Modified header.
