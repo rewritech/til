@@ -25,3 +25,23 @@ R 프로그램 - 시즌 1
     * 제일 많이 사용
     * 화면 분할이 좋음
     * 여러 줄의 코드를 실행 가능
+
+## 2. value 지정
+
+> Youtube: [R 프로그램 2_value 지정
+](https://www.youtube.com/watch?v=H9bIm742fwg&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=2)
+
+1. 변수 <- 값
+1. 변수 = 값 (위와 동일)
+1. 사칙연산
+    * '+' : 덧셈
+    * '-' : 뺄셈
+    * '*' : 곱셈
+    * '/' : 나눗셈
+
+```R
+x <- 2
+y = 5
+z <- x*y
+z # 10
+```
