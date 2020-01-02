@@ -33,6 +33,7 @@ R 프로그램 - 시즌 1
 
 1. 변수 <- 값
 1. 변수 = 값 (위와 동일)
+1. 값 -> 변수 (반대도 가능)
 1. 사칙연산
     * '+' : 덧셈
     * '-' : 뺄셈
@@ -44,4 +45,40 @@ x <- 2
 y = 5
 z <- x*y
 z # 10
+```
+
+## 3. demo, vector, length
+
+> Youtube: [R 프로그램 3_demo, value, length
+](https://www.youtube.com/watch?v=C-EAjg5TODM&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=3)
+
+### 1. demo
+
+1. demo(persp): 지형 그림
+1. demo(graphics): 도표 표시
+
+### 2. vector
+
+1. vector: 한 변수에 여러 값 할당
+    * c(1,2,3)
+    * 한가지 자료형만 입력
+1. vector끼리 연산 가능
+    * 두 vector의 길이는 배수관계 필요
+1. length: 길이 반환
+
+```R
+x <- c(1,2,3)
+x # 1 2 3
+y <- c(2,3,4)
+x*y # 2  6 12
+
+z <- 9
+x*z # 9 18 27
+
+a <- c(1,2)
+x*a # error: 두 객체의 길이가 서로 배수관계에 있지 않습니다.
+
+length(x) # 3
+length(z) # 1
+length(a) # 2
 ```
