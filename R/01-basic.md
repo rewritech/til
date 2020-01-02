@@ -82,3 +82,37 @@ length(x) # 3
 length(z) # 1
 length(a) # 2
 ```
+
+## 3. data type, boolean
+
+> Youtube: [R 프로그램 4_data type, true, false](https://www.youtube.com/watch?v=B9oXCeM_QVE&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=4)
+
+### 1. data type
+
+1. str(): 데이터 타입 파악
+
+```R
+x <- c(1,2,3)
+y <- c('2','3','4')
+
+x*y # Error: 이항연산자에 수치가 아닌 인수입니다
+
+str(x) # num [1:3] 1 2 3
+str(y) # chr [1:3] "2" "3" "4"
+```
+
+### 2. boolean
+
+1. boolean
+    * true: 참
+    * false: 거짓
+1. 데이터 타입 상관 없이 비교가능
+
+```R
+1+2==3 # TRUE
+1+2==5 # FALSE
+
+x <- c(1,2,3)
+y <- c('1','2','4')
+x==y # TRUE  TRUE FALSE
+```
