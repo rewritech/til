@@ -62,6 +62,7 @@ z # 10
 1. vector: 한 변수에 여러 값 할당
     * c(1,2,3)
     * 한가지 자료형만 입력
+    * 다른 언어와 달리 1부터 시작
 1. vector끼리 연산 가능
     * 두 vector의 길이는 배수관계 필요
 1. length: 길이 반환
@@ -83,7 +84,7 @@ length(z) # 1
 length(a) # 2
 ```
 
-## 3. data type, boolean
+## 4. data type, boolean
 
 > Youtube: [R 프로그램 4_data type, true, false](https://www.youtube.com/watch?v=B9oXCeM_QVE&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=4)
 
@@ -115,4 +116,41 @@ str(y) # chr [1:3] "2" "3" "4"
 x <- c(1,2,3)
 y <- c('1','2','4')
 x==y # TRUE  TRUE FALSE
+```
+
+## 5. 간단한 함수
+
+> Youtube: [R 프로그램 5_간단한 함수, sum, mean, max, min](https://www.youtube.com/watch?v=J48Mqi6WAck&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=5)
+
+### 1. sum, mean, max, min
+
+1. str(): 데이터 타입 파악
+    1. max(x): 최대값
+    1. min(x): 최소값
+    1. sum(x): 합계
+    1. mean(x): 평균
+        * sum(x)/length(x)와 같음
+
+```R
+x <- c(1,22,3,5,100,-7,22,-50)
+
+max(x) # 100
+min(x) # -50
+sum(x) # 96
+mean(x) # 12
+sum(x)/length(x) # 12
+```
+
+### 2. 벡터 생성 및 접근
+
+1. c(1:10): 1부터 10까지 생성
+
+```R
+x <- c(1:10)
+x # [1] 1   2   3   4   5   6   7   8   9  10
+
+x[5] # [1] 5
+x[5:10] # [1]  5  6  7  8  9 10
+
+x[110] # [1] NA
 ```
