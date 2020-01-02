@@ -172,3 +172,59 @@ sum(x[x>5]) # 144
 
 which(x>5) # 2 5 7
 ```
+
+## 7. data frame
+
+> Youtube: [R 프로그램 7_data frame, 데이터 프레임](https://www.youtube.com/watch?v=83RKFVfF3S4&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=7)
+
+1. 생성: member <- data.frame(x, y, z)
+1. 접근
+    * member[1]
+    * member[,1]
+    * member[1,]
+    * member[1,1]
+    * member$occup
+1. 값변경: member[1,1] <- '변경값'
+
+```R
+name <- c('john','andy','lisa')
+sex <- c('m','m','f')
+occup <- c('doctor','programer','teacher')
+age <- c(35,32,27)
+
+member <- data.frame(name, age, sex, occup)
+#   name age sex     occup
+# 1 john  35   m    doctor
+# 2 andy  32   m programer
+# 3 lisa  27   f   teacher
+
+member[1]
+#   name
+# 1 john
+# 2 andy
+# 3 lisa
+
+member[,1]
+# [1] john andy lisa
+# Levels: andy john lisa
+
+member[1,]
+#   name age sex  occup
+# 1 john  35   m doctor
+
+member[1,1]
+# [1] john
+# Levels: andy john lisa
+
+member$occup
+# [1] doctor    programer teacher
+# Levels: doctor programer teacher
+
+member$occup[which(member$name == 'andy')]
+# [1] programer
+# Levels: doctor programer teacher
+
+member[1,3] # m
+member[1,3] <- 'f' # 변경
+member[1,3] # f
+```
