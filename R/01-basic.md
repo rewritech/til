@@ -105,8 +105,8 @@ str(y) # chr [1:3] "2" "3" "4"
 ### 2. boolean
 
 1. boolean
-    * true: 참
-    * false: 거짓
+    * true: 참, 숫자로 1 의미
+    * false: 거짓, 숫자로 0 의미
 1. 데이터 타입 상관 없이 비교가능
 
 ```R
@@ -153,4 +153,22 @@ x[5] # [1] 5
 x[5:10] # [1]  5  6  7  8  9 10
 
 x[110] # [1] NA
+```
+
+## 6. vector의 조건응용과 which
+
+> Youtube: [R 프로그램 6_which와 기본함수](https://www.youtube.com/watch?v=ltJ8jkyKtmo&list=PLupRxDNsA2DRBX3yJf9SL0r35-zzbLuLC&index=6)
+
+1. vector에 조건식 적용하면 모든 요소의 결과 반환
+2. which로 조건에 맞는 위치정보 반환
+
+```R
+x <- c(1,22,3,5,100,-7,22,-50)
+x>5 # FALSE  TRUE FALSE FALSE  TRUE FALSE  TRUE FALSE
+
+sum(x>5) # 3, 3개의 true를 더한 값
+x[x>5] # 22 100  22
+sum(x[x>5]) # 144
+
+which(x>5) # 2 5 7
 ```
