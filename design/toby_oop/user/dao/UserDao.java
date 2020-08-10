@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import oop.src.user.domain.User;
 
 
-public class UserDao {
+public abstract class UserDao {
     public void add(User user) throws ClassNotFoundException, SQLException {
         Connection c = getConnection();
 
@@ -54,7 +54,11 @@ public class UserDao {
     }
 
 
-    private Connection getConnection() throws ClassNotFoundException, SQLException {
+    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
+}
+
+public abstract class MSUserDAO extends UserDao {
+    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
         Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         Connection c = DriverManager.getConnection(
             "jdbc:sqlserver://localhost:1433;database=toby;", "sa", "1234"

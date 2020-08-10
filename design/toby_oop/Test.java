@@ -2,8 +2,8 @@ package toby_oop;
 
 import java.sql.SQLException;
 
-import oop.src.user.dao.UserDao;
-import oop.src.user.domain.User;
+import toby_oop.user.domain.UserDao;
+import toby_oop.user.domain.User;
 
 
 public class Test {
