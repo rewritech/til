@@ -2,14 +2,14 @@ package toby_oop;
 
 import java.sql.SQLException;
 
-import toby_oop.user.domain.UserDao;
+import toby_oop.user.dao.UserDao;
 import toby_oop.user.domain.User;
 
 
 public class Test {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         UserDao dao = new UserDao();
-    
+
         User user = new User();
         user.setId("Gim");
         user.setName("Gim HJ");
