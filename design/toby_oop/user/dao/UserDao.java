@@ -15,8 +15,8 @@ public class UserDao {
     private ConnectionMaker connectionMaker;
 
 
-    public UserDao() {
-        connectionMaker = new MSConnectionMaker();
+    public UserDao(ConnectionMaker connectionMaker) {
+        this.connectionMaker = connectionMaker;
     }
 
 

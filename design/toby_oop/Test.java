@@ -2,13 +2,18 @@ package toby_oop;
 
 import java.sql.SQLException;
 
+import toby_oop.user.dao.ConnectionMaker;
+import toby_oop.user.dao.MSConnectionMaker;
 import toby_oop.user.dao.UserDao;
 import toby_oop.user.domain.User;
 
 
 public class Test {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        UserDao dao = new UserDao();
+        // ConnectionMaker connectionMaker = new OracleConnectionMaker();
+        // ConnectionMaker connectionMaker = new MySQLConnectionMaker();
+        ConnectionMaker connectionMaker = new MSConnectionMaker();
+        UserDao dao = new UserDao(connectionMaker);
 
         User user = new User();
         user.setId("Gim");
