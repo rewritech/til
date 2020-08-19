@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import sun.security.jca.GetInstance.Instance;
 import toby_oop.user.domain.User;
 
 // MS SQL 연동 sqljdbc42.jar
@@ -12,11 +13,17 @@ import toby_oop.user.domain.User;
 
 
 public class UserDao {
+    private static UserDao INSTANCE;
     private ConnectionMaker connectionMaker;
 
 
-    public UserDao(ConnectionMaker connectionMaker) {
+    private UserDao(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
+    }
+
+    public static synchronized UserDao getInstance()  {
+        if (INSTANCE == null) INSTANCE = new UserDao(???);
+        return INSTANCE;
     }
 
 
