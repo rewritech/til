@@ -56,3 +56,76 @@
     --name mysql \
     mysql:5.7
     ```
+
+
+### 도커 기본 명령어
+
+#### 컨테이너 관련
+
+- 컨테이너 목록 확인: docker ps
+    ```bash
+    docker ps  # 실행중 컨테이너 목록
+    docker ps -a  # 종료된 컨테이너까지 출력
+    docker ps --all  # 상동
+    ```
+
+- 컨테이너 중지: docker stop [OPTIONS] CONTAINER [CONTAINER...]
+    ```bash
+    docker stop ${CONTAINER1_ID}
+    docker stop ${CONTAINER2_ID} ${CONTAINER3_ID}  # 여러개 종료
+    ```
+
+- 컨테이너 삭제: docker rm [OPTIONS] CONTAINER [CONTAINER...]
+    ```bash
+    docker rm  ${CONTAINER1_ID}
+    docker rm ${CONTAINER2_ID} ${CONTAINER3_ID}  # 여러개 삭제
+
+    # 중지 컨테이너 일괄 삭제
+    docker rm -v $(docker ps -a -q -f status=exited)
+    ```
+
+#### 이미지 관련
+
+- 이미지 목록 확인: docker images [OPTIONS] [REPOSITORY[:TAG]]
+    ```bash
+    docker images
+    ```
+
+- 이미지 다운로드: docker pull [OPTIONS] NAME[:TAG|@DIGEST]
+    - run: 자동으로 다운로드 후 실행
+    - pull: 최식버전으로 다시 다운로드 시 사용
+    ```bash
+    docker pull
+    ```
+
+- 이미지 삭제: docker rmi [OPTIONS] IMAGE [IMAGE...]
+    - 실행중 이미지 삭제 불가
+    ```bash
+    docker rmi ${IMAGE1_ID}
+    ```
+
+#### 컨테이너 로그 보기
+- 로그 확인: docker logs [OPTIONS] CONTAINER
+    - 표준 스트림(Standard streams) 중 stdout, stderr 수집
+        - 컨테이너 내 실행 프로그램의 로그 설정을 파일이 아닌 표준출력으로 변경 필요
+        - 출력 방식 변경만으로 모든 컨테이너는 같은 방식으로 로그 관리 가능
+    - 로그파일은 json 방식으로 어딘가에 저장
+        - 로그가 많으면 차지하는 용량이 커지므로 주의
+        - 도커 지원 플러그인으로 json 외의 특정 로그 서비스에 스트림을 전달 가능
+        - 앱 규모가 커지면 기본적인 방식 대신 로그 서비스를 이용 고려 필요
+    ```bash
+    docker logs ${CONTAINER1_ID}
+    docker logs --tail 10 ${CONTAINER1_ID}  # 마지막 10줄 출력
+    docker logs -f 10 ${CONTAINER1_ID}  # 실시간 생성로그 출력, ctrl + c로 종료
+    ```
+
+#### 컨테이너 명령어 실행하기 (exec)
+> 실행중인 컨테이너에 들어가거나 컨테이너의 파일을 실행 필요. 컨테이너에 SSH 설치 비권장
+- 컨테이너 명령어 실행: docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+    - run: 새로 컨테이너 만들어서 실행
+    - exec: 실행중인 컨테이너에 명령어를 실행
+    ```bash
+    docker exec -it mysql /bin/bash  # 키보드 입력 위해 -it 옵션 추가
+    ```
+
+### 컨테이너 업데이트
