@@ -1,9 +1,10 @@
-// npx ts-node index.ts
+// typescript tutorial for introduction
+// run cmd: npx ts-node tutorial.ts
 let val1: number = 1
 val1 = 10
 
 const val2: number = 2
-val2 = 20  // error
+val2 = 20  // error: const can't change
 
 let val3 = 3  // set number automatically 
 
@@ -13,11 +14,11 @@ let c1: any = a1 + b1
 
 let a2 = 1
 let b2 = []
-let c2 = a2 + b2
+let c2 = a2 + b2  // error: different type
 
 let x: unknown  // 잘 안 씀
 x = 3
-x += 10  // need to check with if
+x += 10  // error: need to check with if
 if (typeof x === 'number') {
     x += 10
 }
@@ -70,11 +71,11 @@ type normal = User | Staff
 
 // tuple
 let tuple1: [number] = [1]
-let tuple2: [number, string] = [1]
-let tuple3: [number] = [1, 2, 3, 4]
+let tuple2: [number, string] = [1]  // error: short
+let tuple3: [number] = [1, 2, 3, 4]  // error: long
 
 let r_a: readonly number[] = [0, 1, 2]
-a[0] = 3  // 불가
+a[0] = 3  // error: readonly can't change even inside of object
 
 
 function add0(a: number, b: number) {  // return type automatically set
@@ -86,7 +87,7 @@ function add1(a: number, b: number): number {
 }
 
 function add2(a: number, b: number): string {
-    return a + b  // need to return string
+    return a + b  // error: need to return string
 }
 
 let add4 = (a: number, b: number) => a + b
@@ -187,6 +188,7 @@ let filter5: Filter5<number> = (array, f) => {
 let filter_result5 = filter5([1, 2, 3], n => n > 2)
 
 
+// object for most data type
 type Filter6<T extends object> = (a: T) => T
 let filter6_1: Filter6<number[]>
 let filter6_2: Filter6<[string, number]> = (tu) => {
