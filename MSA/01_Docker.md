@@ -21,19 +21,20 @@
 
 ## [설치하고 컨테이너 실행하기](https://subicura.com/2017/01/19/docker-guide-for-beginners-2.html)
 ### 도커 설치하기
-- Linux
-    ```
-    curl -fsSL https://get.docker.com/ | sudo sh
-    ```
-- sudo 없이 사용하기
-    ```bash
-    sudo usermod -aG docker $USER # 현재 접속중인 사용자에게 권한주기
-    sudo usermod -aG docker your-user # your-user 사용자에게 권한주기
-    ```
-- Docker 버전확인
-    ```bash
-    docker version
-    ```
+- winodws는 다운로드 설치 [link](https://hub.docker.com/editions/community/docker-ce-desktop-windows/)
+    - Linux는 아래 명령어로 설치
+        ```
+        curl -fsSL https://get.docker.com/ | sudo sh
+        ```
+    - sudo 없이 사용하기
+        ```bash
+        sudo usermod -aG docker $USER # 현재 접속중인 사용자에게 권한주기
+        sudo usermod -aG docker your-user # your-user 사용자에게 권한주기
+        ```
+    - Docker 버전확인
+        ```bash
+        docker version
+        ```
 - 자주 사용하는 옵션
     | 옵션  | 설명                                                   |
     |-------|--------------------------------------------------------|
@@ -129,3 +130,44 @@
     ```
 
 ### 컨테이너 업데이트
+1. 새 버전 이미지 다운(pull)
+1. 기존 컨테이너 정지 삭제(stop, rm)
+1. 새 이미지 기반 새 컨테이너 실행(run)
+#### **컨테이너 삭제에도 쌓인 데이터 유지**
+1. 외부 스토리지에 저장(Best예: 외부 클라우드 AWS)
+2.  데이터 볼륨Data volumes을 컨테이너에 추가 사용
+    - 해당 디렉토리는 컨테이너와 별도로 저장
+    - -v 옵션
+```bash
+# before
+docker run -d -p 3306:3306 \
+  -e MYSQL_ALLOW_EMPTY_PASSWORD=true \
+  --name mysql \
+  mysql:5.7
+
+# after
+docker run -d -p 3306:3306 \
+  -e MYSQL_ALLOW_EMPTY_PASSWORD=true \
+  --name mysql \
+  -v /my/own/datadir:/var/lib/mysql \ # <- volume mount
+  mysql:5.7
+  # 호스트 디렉토리: /my/own/datadir
+  # 컨테이너 디렉토리: /var/lib/mysql
+  # mysql 새 이미지 컨테이너도 기존 데이터 사용 가능
+```
+
+### Docker Compose
+- 복잡한 명령어 관리
+- Docker Compose: YAML방식 설정파일 이용
+- 자동설치: Docker for Mac, Docker for Windows
+    - Linux는 설치
+        ```bash
+        curl -L "https://github.com/docker/compose/releases/download/1.9.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+        # test
+        docker-compose version
+        ```
+- 실행
+    ```bash
+    docker-compose up
+    ```
