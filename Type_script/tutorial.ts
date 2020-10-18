@@ -200,3 +200,108 @@ let filter6_2: Filter6<[string, number]> = (tu) => {
 }
 
 let result_filter6_2 = filter6_2(['10', 0])
+
+
+// Class
+abstract class Character {
+    protected abstract hp: number
+    protected abstract name: string
+    protected abstract str: number
+    protected abstract def: number
+ 
+    protected abstract attack(target: Player, dmg: number): void
+    protected abstract defence(dmg: number): void
+ }
+ 
+ class Player extends Character {
+   protected hp: number
+   protected name: string
+   protected str: number
+   protected def: number
+ 
+   constructor(hp: number, name: string, str: number, def: number) {
+       super()
+       this.hp = hp
+       this.name = name
+       this.str = str
+       this.def = def
+   }
+ 
+   attack(target: Player, dmg: number) {
+       target.defence(dmg)
+   }
+ 
+   defence(dmg: number) {
+       const totalDmg = dmg - this.def
+       this.hp -= totalDmg
+       console.log(this.name, totalDmg, 'damaged!', 'remain hp : ', this.hp)
+   }
+ }
+ 
+ class Wizard extends Player {
+   private mp: number
+   constructor(hp: number, name: string, str: number, def: number, mp: number) {
+       super(hp, name, str, def)
+       this.mp = mp
+   }
+ 
+   fireBall(target: Player) {
+       const dmg = this.str * 5
+       this.mp -= 20
+       console.log(this.name, 'use Fire Ball!!', 'remain mp', this.mp)
+       this.attack(target, dmg)
+       console.log('=====================')
+   }
+ }
+ 
+ class Warrior extends Player {
+   private stamina: number
+   constructor(hp: number, name: string, str: number, def: number, stamina: number) {
+       super(hp, name, str, def)
+       this.stamina = stamina
+   }
+//    constructor(
+//        hp: number,
+//        name: string,
+//        str: number,
+//        def: number,
+//        private stamina: number  // 선언과 동시에 생성
+//        ) {
+//        super(hp, name, str, def)
+//        this.stamina = stamina
+//    }
+
+whirlwind(target: Player) {
+    const dmg = this.str * 0.7
+    this.stamina -= 20
+    console.log(this.name, 'use whrlwind!!', 'remain stamina', this.stamina)
+    for (let i = 1; i < 9; i ++) {
+        this.attack(target, dmg)
+    }
+    console.log('=====================')
+}
+}
+
+let wizard: Wizard = new Wizard(100, 'wizard', 40, 10, 100)
+let warrior: Warrior = new Warrior(300, 'warrior', 20, 30, 50)
+
+wizard.fireBall(warrior)
+warrior.whirlwind(wizard)
+
+class Test1 {
+    public a: number
+    protected b: number  // callable subclass and inside of this
+    private c: number  // callable only inside of this
+
+    printNum() {
+        console.log(this.b)
+        console.log(this.c)
+    }
+}
+
+let t1:Test1 = new Test1()
+console.log(t1.a)
+console.log(t1.b)  // eror
+console.log(t1.c)  // eror
+
+
