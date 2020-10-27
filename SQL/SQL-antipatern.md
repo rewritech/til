@@ -325,7 +325,12 @@
         - FOREIGN KEY (reported_by) REFERENCES Accounts(accoint_id)
       - 테이블 컬럼 이름 짓기 책: [Joe Celko's SQL Programming Style](https://www.amazon.co.jp/Programming-Kaufmann-Management-Systems-English-ebook/dp/B006L21AO6/ref=tmm_kin_swatch_0?_encoding=UTF8&qid=1603721497&sr=8-1)
   - 관례에서 벗어나기
+    - 프레임워크 지원 id 재설정 방법 탐구(루비)
   - 자연키와 복합기 포용
+    - 유일성과 Not Null이 보장되는 칼럼을 PK로 지정
+      - 꼭 가상키를 사용할 필요는 없음
+    - 복합키가 적절할 시에는 복합키를 사용
+      - 복합PK 참조 FK 또한 복합키가 되어야 함
 
 ### 형식
 
