@@ -414,11 +414,11 @@
     - 엔터티: (보통)한 엔터티에 한 행을 가지는 부모 테이블에 대한 FK칼럼
     - 속성: 일반 테이블에서 칼럼명을 나태내나, 이 설계에서는 각 행마다 속성이 들어감
     - 값: 각 속성에 대한 값
+
       ```SQL
       CREATE TABLE Issues (
         issue_id SERIAL PRIMARY KEY
       );
-      
       
       CREATE TABLE IssueAttributes (
         issue_id BIGINT UNSIGNED NOT NULL,
@@ -428,6 +428,7 @@
         FOREIGN KEY (issue_id) REFERENCES Issues(issue_id)
       );
       ```
+
   - 보이는 이득
     - 두 테이블 모두 적은 칼럼 소유
     - 새 속성은 칼럼 추가 없이 행 추가로 가능
@@ -437,10 +438,69 @@
     - SELECT 칼럼명으로 끝날 일을 WHERE 속성명 지정으로 복잡하게 수행
   - 데이터 정합성 지원
     - 필수 속성 사용 불가
+      - 칼럼입력을 NOT NULL로 강제 불가
+      - 행에 대한 입력 강제이기에 애플리케이션 코드 작성 필요
     - SQL 데이터 타입 사용 불가
+      - DATE, INT 등 상제 불가
     - 참조 정합성 강제 불가
+      - 색인 테이블에 대한 FK정의로 입력 범위 제한 불가
+
+        ```SQL
+        FOREIGN KEY (status) REFERENCES BugStatus(status)
+        ```
+
     - 속성 이름 강제 불가
+      - 같은 의미 데이터를 date_reported 혹은 report_date로 저장 가능
+      - 서브 커리로 집계 가능하나 이도 불확실
+      - attr_name칼럼이 칼럼명 테이블을 참조하는 FK제약 가능하나, 속성명 추가제한 발생
+
+        ```SQL
+        SELECT date_reported, COUNT(*) AS bugs_per_date
+        FROM (SELECT DISTINCT issue_id, attr_value AS date_reported
+        FROM IssueAttributes
+        WHERE attr_name IN ('date_reported', 'report_date'))
+        GROUP BY date_reported;
+        ```
+
   - 행 재구성하기
+    - 한 행의 일부로 속성검색은 많은 조인 필요
+
+      ```SQL
+      SELECT i.issue_id,
+        i1.attr_value AS "date_reported",
+        i2.attr_value AS "status",
+        i3.attr_value AS "priority",
+        i4.attr_value AS "description"
+      FROM Issues AS i
+        LEFT OUTER JOIN IssueAttributes AS i1
+          ON i.issue_id = i1.issue_id AND i1.attr_name = 'date_reported'
+        LEFT OUTER JOIN IssueAttributes AS i2
+          ON i.issue_id = i2.issue_id AND i2.attr_name = 'status'
+        LEFT OUTER JOIN IssueAttributes AS i3
+          ON i.issue_id = i3.issue_id AND i3.attr_name = 'priority';
+        LEFT OUTER JOIN IssueAttributes AS i4
+          ON i.issue_id = i4.issue_id AND i4.attr_name = 'description';
+      WHERE i.issue_id = 1234;
+      ```
+
+    - CASE문 사용시 여러 조인 없이 가능하나, 모든 칼럼명 파악과 복잡 쿼리 문제가 남음
+
+      ```SQL
+      SELECT issue_id, MAX(date_reported), MAX(status), MAX(priority), MAX(description)
+      FROM (
+        SELECT issue_id,
+          CASE WHEN attr_name='date_reported' THEN attr_value END date_reported,
+          CASE WHEN attr_name='status' THEN attr_value END status,
+          CASE WHEN attr_name='priority' THEN attr_value END priority,
+          CASE WHEN attr_name='description' THEN attr_value END description
+        FROM IssueAttributes
+        WHERE issue_id=1234
+      ) t
+      GROUP BY issue_id;
+      ```
+
+    - 결국 쿼리 비용이 높음
+
 - 안티패턴 인식 방법
   - 
 - 안티패턴 사용이 합당한 경우
