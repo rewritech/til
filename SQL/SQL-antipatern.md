@@ -389,12 +389,14 @@
   - 여러 테이블 변경 지원
     - 단계적 업데이트(cascading update)
     - 자식 테이블 추가 시 FK에 단계적 동작 기술
+
       ```SQL
       FOREIGN KEY (status) REFERENCES BugStatus(status)
         ON UPDATE CASCADE    -- 부모따라 자동 업데이트
         ON DELETE SET DEFAULT
         --ON DELETE RESTRICT  -- 부모 행 삭제 억제
       ```
+
   - 오버헤드는 다른 대안에 비해 오하려 적다
     - INSERT, UPDATE, DELETE 전에 데이터 확인용 SELECT 불필요
     - 여러 테이블 변경 위해 데이블 잠금 불필요
@@ -402,7 +404,7 @@
   - FK는 쉬운 사용, 성능 향상, 참조 정합성 유지의 장점이 있다
 
 
-### 엔터티-속성-값
+### 엔터티-속성-값(EAV)
 
 - 목표: 가변 속성 지원
   - 테이블은 속성집합으로 객체를 나타낼 수 있음
@@ -419,7 +421,7 @@
       CREATE TABLE Issues (
         issue_id SERIAL PRIMARY KEY
       );
-      
+
       CREATE TABLE IssueAttributes (
         issue_id BIGINT UNSIGNED NOT NULL,
         attr_name VARCHAR(100) NOT NULL,
@@ -502,9 +504,29 @@
     - 결국 쿼리 비용이 높음
 
 - 안티패턴 인식 방법
-  - 
+  - 이 DB는 메타데이터 변경 없이 런타임에 새 속성 정의할 수 있어
+    - 관계형DB는 이 정도의 유연성을 제공하지 않음
+  - 한 쿼리에 최대 가능 조인은 몇 번이지?
+    - DB의 한계를 초과하는 조인회수는 EAV의 흔한 문제
+  - 우리 서비스는 리포트를 어떻게 생성해야 할지 모르겠어
+    - EAV설계 소프트웨어는 일반적인 리포트 생성이 매우 복잡하거나 비현실적
+
 - 안티패턴 사용이 합당한 경우
-  - 
+  - 관계형DB에서 EAV 안티패턴을 합리화하기 어려움
+  - 동적 속성을 지원하는 일부 애플리케이션에서는 필요
+    - 애플리케이션엣서 동적 속성이 필요한 테이블은 최대 2-3개
+    - 숙련 DB컨설턴트는 EAV시스템이 1년 내 다루기 어려워진다 함
+  - 비관계형 데이터 관리가 필요하다면 비관계형 기술을 사용
+    - Berkeley DB: 키-값(key-value)저장소
+    - Cassandra: Facebook 개발 분산 칼럼지향 데이터베이스(Apache 프로젝트로 공개)
+    - CouchDB: 문서지향 데이터베이스로 JSON을 사용해 분산 키-값 데이터 표현
+      - MongoDB도 마찬가지
+      - Redis: 문서지향 메모리 데이터베이스
+    - Hadoop과 HBase:
+      - 대규모 반구조적(semistructured) 데이터 저장소에 대한 분산 쿼리를 위한 Google의 MapReduce 알고리즘에서 영감을 받아 작성된 오픈 소스 DBMS다.
+    - Tokyo Cabinet: 키-값 저장소로, POSIX DBM, GNU GDBM 또는 Berkeley DB 스타일로 설계
+  - 그러나, 메타데이터가 유동적이면 간단한 쿼리작성도 데이터 구조 발견 및 적응에 큰 비용 발생
+
 - 해법
   - 
 
