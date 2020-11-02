@@ -1,7 +1,10 @@
 # 안티패턴
+
 ## 개요
+
 ---
-### 안티패턴: 널리 사용되지만 실제로는 좋지 않은 패
+
+### 안티패턴: 널리 사용되지만 실제로는 좋지 않은 패턴
 
 - 어떤 문제를 해결하려는 의도로 사용하지만 실제로는 더 많은 문제를 유발하는 패턴
 
@@ -25,9 +28,14 @@
 - 해법
   - 안티패턴을 막으며 원래 목표 달성 해법
 
-## 논리적 데이터베이스 설계 안티패턴
 ---
+
+## 논리적 데이터베이스 설계 안티패턴
+
+---
+
 ### 무단횡단
+
 > 다대다 교차테이블 피하기 위해 쉼표 구분 데이터를 사용하는 것
 
 - 목표
@@ -64,7 +72,7 @@
     - 정규화가 먼저, 반정규화는 보수적으로 접근
   - 애플리케이션에서 구분자 형식의 데이터가 필요한 경우
   - 목록 내 개별 항목에 접근 필요 없는 경우
-  - 다른 DB 구분자 형식 항목을 그대로 사용하며, 분리 불필요 경우 
+  - 다른 DB 구분자 형식 항목을 그대로 사용하며, 분리 불필요 경우
 - 해법: 교차 테이블 생성
   - Contacts 테이블로 Products와 Accounts사이 다대다 관계 구현
     - FK(product_id), FK(account_id)
@@ -83,6 +91,8 @@
     - 인덱스 활용으로 성능 향상
       - FK선언 칼럼: 내부적 인덱스 생성(각 DB문서 확인 필요)
     - 칼럼 추가로 다른 정보 저장 가능
+
+---
 
 ### 순진한 트리
 
@@ -248,6 +258,8 @@
   - 대안 비교  
     ![01-02-계층적_데이터모델_비교](./img/01-02-계층적_데이터모델_비교.PNG)
 
+---
+
 ### 아이디가 필요해
 
 - 목표: PK 관례 확립
@@ -323,7 +335,7 @@
       - FK가 아닌 한 동일 PK명 다른 테이블에서 금지
       - FK는 연결의 본질을 표현하는 이름 사용 가능
         - FOREIGN KEY (reported_by) REFERENCES Accounts(accoint_id)
-      - 테이블 컬럼 이름 짓기 책: [Joe Celko's SQL Programming Style](https://www.amazon.co.jp/Programming-Kaufmann-Management-Systems-English-ebook/dp/B006L21AO6/ref=tmm_kin_swatch_0?_encoding=UTF8&qid=1603721497&sr=8-1)
+      - 테이블 칼럼 이름 짓기 책: [Joe Celko's SQL Programming Style](https://www.amazon.co.jp/Programming-Kaufmann-Management-Systems-English-ebook/dp/B006L21AO6/ref=tmm_kin_swatch_0?_encoding=UTF8&qid=1603721497&sr=8-1)
   - 관례에서 벗어나기
     - 프레임워크 지원 id 재설정 방법 탐구(루비)
   - 자연키와 복합기 포용
@@ -331,6 +343,8 @@
       - 꼭 가상키를 사용할 필요는 없음
     - 복합키가 적절할 시에는 복합키를 사용
       - 복합PK 참조 FK 또한 복합키가 되어야 함
+
+---
 
 ### 키가 없는 엔트리
 
@@ -403,6 +417,7 @@
     - 고아 데이터 정정 위해 품질 제어 스크립트 실행 불필요
   - FK는 쉬운 사용, 성능 향상, 참조 정합성 유지의 장점이 있다
 
+---
 
 ### 엔터티-속성-값(EAV)
 
@@ -527,8 +542,187 @@
     - Tokyo Cabinet: 키-값 저장소로, POSIX DBM, GNU GDBM 또는 Berkeley DB 스타일로 설계
   - 그러나, 메타데이터가 유동적이면 간단한 쿼리작성도 데이터 구조 발견 및 적응에 큰 비용 발생
 
-- 해법
-  - 
+- 해법: 서브타입 모델링
+  - 단일 테이블 상속(Single Table Inheritance)
+    - 관련 모든 속성을 한 테이블에 저장
+      - 속성 하나는 행의 서브타입을 나타내는 데 사용(예: issue_type)
+      - 특정 속성 미적용 객체는 해당 속성 칼럼에 NULL 저장
+      - 새로운 객체 타입 발생시, 해당 속성 칼럼 추가
+      ```SQL
+      CREATE TABLE Issues (
+        issue_id SERIAL PRIMARY KEY,
+        reported_by BIGINT UNSIGNED NOT NULL,
+        version_resolved VARCHAR(20),
+        issue_type VARCHAR(10),       -- BUG 또는 FEATURE
+        severity VARCHAR(20),         -- '버그'에서만 사용
+        version_affected VARCHAR(20), -- '버그'에서만 사용
+        sponsor VARCHAR(50),          -- '기능요청'에서만 사용
+        FOREIGN KEY (reported_by) REFERENCES Accounts(account_id)
+      );
+      ```
+    - 사용 한계
+      - 테이블 칼럼 최대 수만큼 속성 수 제한
+      - 어떤 속성이 어떤 서브타입 객체에 속하는지 정의하는 메타데이터 부재
+        - 속성의 적용 서브타입은 추적 및 제한 필요(애플리케이션)
+    - 사용이 적합한 경우
+      - 서브타입과 그 서브타입에만 속하는 속성 개수가 적을 때
+      - 액티브 레코드와 같은 단일 테이블 데이터베이스 접근 패턴을 사용해야 할 때
+        - 액티브 레코드: 관계형데이터베이스(RDBMS)의 테이블을 객체로 연결(ORM : Object Relational Mapping)해서 네이티브 데이터베이스 SQL을 사용하지 않고도 데이터를 조작할 수 있도록 다양한 메소드가 제공되는 패턴
+
+  - 구체 테이블 상속(Concrete Table Inheritance)
+    - 서브타입별로 별도의 테이블 생성(모든 테이블이 공통 속성을 공유)
+
+      ```SQL
+      CREATE TABLE Bugs (
+        issue_id SERIAL PRIMARY KEY,
+        reported_by BIGINT UNSIGNED NOT NULL,
+        severity VARCHAR(20),         -- '버그'에서만 사용
+        version_affected VARCHAR(20), -- '버그'에서만 사용
+        FOREIGN KEY (reported_by) REFERENCES Accounts(account_id)
+      );
+      CREATE TABLE FeatureRequests (
+        issue_id SERIAL PRIMARY KEY,
+        reported_by BIGINT UNSIGNED NOT NULL,
+        sponsor VARCHAR(50),           -- '기능요청'에서만 사용
+        FOREIGN KEY (reported_by) REFERENCES Accounts(account_id)
+      );
+      ```
+
+    - 장점(단일 테이블 상속에 비해)
+      - 행의 서브타입을 나타내는 속성 불필요(예: issue_type)
+      - 서브타입에 필요한 속성만 저장 제한 가능
+
+        ```SQL
+        INSERT INTO FeatureRequests (issue_id, severity)  -- 에러
+        ```
+
+    - 단점
+      - 서브타입 속성 테이블을 보고 고옹 속성 파악 어려움
+      - 공통 속성 추가시 모든 서브타입 테이블 변경 필요
+      - 객체와 저장 서브타입 테이블에 관한 메타데이터 부재로 관계 파악 어려움
+      - 서브타입 상관없이 모든 객체 보기 복잡(UNION으로 묶은 뷰 필요)
+
+        ```SQL
+        CREATE VIEW Issues AS
+          SELECT b.*, 'bug' AS issue_type
+          FROM Bugs AS b
+            UNION ALL
+          SELECT f.*, 'feature' AS issue_type
+          FROM FeatureRequests AS f;
+        ```
+
+    - 사용이 적합한 경우
+      - 모든 서브타입 일괄 조회가 거의 불필요한 경우
+
+  - 클래스 테이블 상속(Class Table Inheritance)
+    - 객체지향 클래스같이 상속 흉내
+      - 공통 속성용 베이스 타입 테이블 생성
+      - 각 서브타입 테이블 생성
+      - 서브타입 테이블 PK는 동시에 베이스 테이블에 대한 FK
+      - 메타데이터에 의해 일대일 관계 강제
+
+        ```SQL
+        CREATE TABLE Issues (
+          issue_id SERIAL PRIMARY KEY,
+          reported_by BIGINT UNSIGNED NOT NULL,
+          version_resolved VARCHAR(20),
+          FOREIGN KEY (reported_by) REFERENCES Accounts(account_id)
+        );
+
+        CREATE TABLE Bugs (
+          issue_id BIGINT UNSIGNED PRIMARY KEY,
+          severity VARCHAR(20),
+          version_affected VARCHAR(20),
+          FOREIGN KEY (issue_id) REFERENCES Issues(issue_id)
+        );
+
+        CREATE TABLE FeatureRequests (
+          issue_id BIGINT UNSIGNED PRIMARY KEY,
+          sponsor VARCHAR(50),
+          FOREIGN KEY (issue_id) REFERENCES Issues(issue_id)
+        );
+        ```
+
+      - 서브타입 개수가 적다면, 조인으로 서브타입 일괄 출력 가능(VIEW후보)
+        - ***개인 생각: Bugs이면서 FeatureRequests인 경우 제어 필요?***
+
+        ```SQL
+        SELECT i.*, b.*, f.*
+        FROM Issues AS i
+          LEFT OUTER JOIN Bugs AS b USING (issue_id)
+          LEFT OUTER JOIN FeatureRequests AS f USING (issue_id);
+        ```
+
+    - 사용이 적합한 경우
+      - 모든 서브타입 조회 및 공통칼럼 참조가 많은 경우
+
+  - 반구조적 데이터(Semistructured Data)
+    - 데이터의 속성 이름과 값을 TEXT(CLOB) 칼럼으로 저장
+      - XML 또는 JSON 형식으로 부호화
+      - Martin Fowler는 이 패턴을 직렬화된 LOB(Serialized LOB)라 부름
+
+      ```SQL
+      CREATE TABLE Issues (
+        issue_id SERIAL PRIMARY KEY,
+        reported_by BIGINT UNSIGNED NOT NULL,
+        version_resolved VARCHAR(20),
+        issue_type VARCHAR(10), -- BUG 또는 FEATURE
+        attributes TEXT NOT NULL, -- 모든 동적 속성을 저장
+        FOREIGN KEY (reported_by) REFERENCES Accounts(account_id)
+      );
+      ```
+
+    - 장점
+      - 새 속성은 TEXT 칼럼에 저장으로 쉽게 추가 가능
+      - 서브타입 추가 새 행 추가로 쉽게 가능
+
+    - 단점
+      - 특정 속성에 접근하는 SQL이 거의 미지원
+      - TEXT 내 각 속성에 대한 제한을 행 기반으로 변경 필요
+      - 집계 및 정렬이 어려움
+      - TEXT를 칼럼 내 특정 속성만 출력 어려움
+      - 속성을 해석하는 애플리케이션 코드 필요
+
+    - 사용이 적합한 경우
+      - 서브타입 개수를 제한이 불가한 경우
+      - 언제든 새 속성 정의가 필요한 경우
+
+  - 사후 처리: EAV 설계를 사용할 수밖에 없는 경우
+    - 안티패턴에서 설명한 문제를 이해하고, EAV 수반 부가작업 예상 및 계획 필수
+    - 엔터티 조회시 관련 속성을 한 행씩 꺼내 처리
+      | issue_id |  attr_name | attr_value |
+      | --- |  --- | --- |
+      | 1234 |  date_reported |  2009-06-01 |
+      | 1234 |  description |  저장 기능 동작 안 함 |
+      | 1234 |  priority  |  HIGH |
+      | 1234 |  product |  Open FoundFile |
+      | 1234 |  reported_by |  Bill |
+      | 1234 |  severity  |  loss of functionality |
+      | 1234 |  status  |  NEW |
+
+      ```php
+      $objects = array();
+
+      $stmt = $pdo->query(
+        ”SELECT issue_id, attr_name, attr_value
+          FROM IssueAttributes
+          WHERE issue_id = 1234”);
+
+      while ($row = $stmt->fetch()) {
+        $id = $row[‘issue_id‘];
+        $field = $row[‘attr_name‘];
+        $value = $row[‘attr_value‘];
+
+        if (!array_key_exists($id, $objects)) {
+          $objects[$id] = new stdClass();
+        }
+
+        $objects[$id]->$field = $value;
+      }
+      ```
+
+> 메타데이터를 위해서는 메타데이터를 사용하라.
+---
 
 ### 형식
 
