@@ -704,14 +704,14 @@
       $objects = array();
 
       $stmt = $pdo->query(
-        ”SELECT issue_id, attr_name, attr_value
+        "SELECT issue_id, attr_name, attr_value
           FROM IssueAttributes
-          WHERE issue_id = 1234”);
+          WHERE issue_id = 1234");
 
       while ($row = $stmt->fetch()) {
-        $id = $row[‘issue_id‘];
-        $field = $row[‘attr_name‘];
-        $value = $row[‘attr_value‘];
+        $id = $row['issue_id'];
+        $field = $row['attr_name'];
+        $value = $row['attr_value'];
 
         if (!array_key_exists($id, $objects)) {
           $objects[$id] = new stdClass();
@@ -722,6 +722,275 @@
       ```
 
 > 메타데이터를 위해서는 메타데이터를 사용하라.
+---
+
+### 다형성 연관
+
+- 목표: 여러 부모 참조
+  - 자식 테이블 comments이 테이블 Bugs 또는 FeatureRequests과 대응한다.
+  - 즉, comments의 한 행은 Bugs과 FeatureRequests를 동시에 대응하지 않는다.
+
+- 안티패턴: 이중 목적의 FK 사용
+  - 다형성 연관(Polymorphic Associations) 정의
+    - 자식 테이블에 부모테이블 이름 저장 칼럼 추가(예: issue_type)
+    - issue_type칼럼에는 Bugs 또는 FeatureRequests만 저장 가능
+    - 부모 테이블을 보는 issue_id에 FK제거
+      - **부모테이블 값과 대응 강제 불가(정합성 불보장)**
+      - issue_type칼럼 데이타와 테이블 이름의 대응확인 메타데이터 부재
+
+    ```SQL
+    CREATE TABLE Comments (
+      comment_id SERIAL PRIMARY KEY,
+      issue_type VARCHAR(20), -- "Bugs" 또는 "FeatureRequests"
+      issue_id BIGINT UNSIGNED NOT NULL,
+      author BIGINT UNSIGNED NOT NULL,
+      comment_date DATETIME,
+      comment TEXT,
+      FOREIGN KEY (author) REFERENCES Accounts(account_id)
+    );
+    ```
+
+  - 다형성 연관에서의 조회
+    - Comments 테이블 issue_id 값은 Bugs와 FeatureRequests 양쪽 PK에 존재 가능
+      - issue_type 지정 필요
+
+      ```SQL
+      -- 한 테이블만 조회하는 경우
+      SELECT *
+      FROM Bugs AS b JOIN Comments AS c
+        ON (b.issue_id = c.issue_id AND c.issue_type = 'Bugs')
+      WHERE b.issue_id = 1234;
+      ```
+
+    - **Bugs와 FeatureRequests 모두 issue_id가 존재시 문제 발생**
+      - 조인 테이블 모두 명시 필요
+
+      ```SQL
+      -- 두 테이블 외부조인으로 조회(미매칭 필드는 NULL)
+      SELECT *
+      FROM Comments AS c
+        LEFT OUTER JOIN Bugs AS b
+          ON (b.issue_id = c.issue_id AND c.issue_type = 'Bugs')
+        LEFT OUTER JOIN FeatureRequests AS f
+          ON (f.issue_id = c.issue_id AND c.issue_type = 'FeatureRequests');
+      ```
+
+  - 비 객체지향 예제
+    - 두 부모 테이블이 서로 관련 없을 떄도 사용 가능
+      - 예: 전자상거래 시스템 Users, Orders, Addesses
+      - 배송지 주소와청구지 주소 구별 칼럼 필요
+        - 다른 부모 테이블도 위와 같은 **특별한 표시가 무수히 발생 가능**
+
+        ```SQL
+        CREATE TABLE Addresses (
+          address_id SERIAL PRIMARY KEY,
+          parent VARCHAR(20),         -- ”Users” 또는 ”Orders”
+          parent_id BIGINT UNSIGNED NOT NULL,
+          users_usage VARCHAR(20),    -- ”billing” 또는 ”shipping”
+          orders_usage VARCHAR(20),   -- ”billing” 또는 ”shipping”
+          address TEXT
+        );
+        ```
+
+- 안티패턴 인식 방법
+  - 이 스키마는 DB 내 어떤 리소스에도 태그 달 수 있다
+  - 우리 DB설계에서는 FK선언이 불가능해
+  - entity_type칼럼이 부모 테이블을 알려주는 칼럼이야?
+  > Ruby on Rails 프래임워크 액티브 레코드 클래스 polymorphic 속성 선언으로 다형성 가능  
+    Java는 Hibemate 프레임워크가 다형성 연관 지원
+
+    ```ruby
+    class Comment < ActiveRecord::Base
+    belongs_to :commentable, :polymorphic => true
+    end
+    class Bug < ActiveRecord::Base
+    has_many :comments, :as => :commentable
+    end
+    class FeatureRequest < ActiveRecord::Base
+    has_many :comments, :as => :commentable
+    end
+    ```
+
+- 안티패턴 사용이 합당한 경우
+  - 기본적으로 다형성 연관 안티패턴 사용하지 말자
+    - FK제약조건을 사용해 참조 정합성을 보장하자
+    - 다형성 연관은 애플리케이션 코드에 지나친 의존한다
+  - 객체-관계 프로그래밍 프레임워크 사용하는 경우 이 안티패선 사용 가능
+    - 참조 정합성 유지용 래플리케이션 로직을 캡슐화해 다형성 연관 위험 완화 가능
+
+- 해법: 관계 단순화
+  > DB 재설계가 나음
+  - [1] 역 참조: 다형성 연관의 관계방향이 거꾸로라는 본질 이해
+    - 교차 테이블 생성
+      - 자식 테이블(Comments)과 각 부모 테이블(Bugs, Features)용 교차 테이블 작성
+      - Comments.issue_type 칼럼 불필요
+      - 관계 관리 위한 애플리케이션 코드 불필요
+      - 연관 관계 정합성을 메타데이터로 강제 가능
+
+      ```SQL
+      CREATE TABLE BugsComments (
+        issue_id BIGINT UNSIGNED NOT NULL,
+        comment_id BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (issue_id, comment_id),
+        FOREIGN KEY (issue_id) REFERENCES Bugs(issue_id),
+        FOREIGN KEY (comment_id) REFERENCES Comments(comment_id)
+      );
+      CREATE TABLE FeaturesComments (
+        issue_id BIGINT UNSIGNED NOT NULL,
+        comment_id BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (issue_id, comment_id),
+        FOREIGN KEY (issue_id) REFERENCES FeatureRequests(issue_id),
+        FOREIGN KEY (comment_id) REFERENCES Comments(comment_id)
+      );
+      ```
+
+    - 신호등 설치
+      - 교차 테이블은 보통 다대다 관계에 사용
+        - 특정 댓글이 복수 버그 및 기능요청과 연관 가능
+        - 각 댓글은 **하나**의 버그 또는 기능요청과 관계 필요
+        - 각 교차테이블의 comment_id 칼럼에 UNIQUE 제약조건 선언으로 강제
+        - **다만, 특정 댓글의 양쪽 교차테이블 참조방지는 애플리케이션 코드 필요**
+
+    - 양쪽 다 보기
+      - 특정 버그 또는 기능요청에 대한 **댓글**은 교차 테이블 이용 조회(예: Bugs)
+
+      ```SQL
+      -- 한 테이블만 조회하는 경우
+      SELECT *
+      FROM BugsComments AS b
+        JOIN Comments AS c USING (comment_id)  --  c.issue_type = 'Bugs' 불필요
+      WHERE b.issue_id = 1234;
+      ```
+
+    - 특정 댓글에 대한 **버그나 기능요청**은 두 교차 테이블 외부조인으로 조회
+      - 조인 테이블 모두 명시 필요
+
+      ```SQL
+      -- 두 테이블 외부조인으로 조회(미매칭 필드는 NULL)
+      SELECT *
+      FROM Comments AS c
+        LEFT OUTER JOIN (BugsComments JOIN Bugs AS b USING (issue_id))
+          USING (comment_id)  --  c.issue_type = 'Bugs' 불필요
+        LEFT OUTER JOIN (FeaturesComments JOIN FeatureRequests AS f USING (issue_id))
+          USING (comment_id)  --  c.issue_type = 'FeatureRequests' 불필요
+      WHERE c.comment_id = 9876;
+      ```
+
+    - 차선 통합
+      - 여러 부모 테이블에 대한 조회 결과를 한번에 출력하는 2가지 방법
+      - 쿼리가 복잡하므로 뷰 생성해서 사용을 추천
+      - (1) UNION
+        - 한쪽 테이블이 존재하지 않는 칼럼은 NULL로 자리를 만듬
+        - 칼럼 순서 동일하게 맞춤
+
+        ```SQL
+        SELECT b.issue_id, b.description, b.version_affected, NULL AS sponsor
+          FROM Comments AS c
+            JOIN (BugsComments JOIN Bugs AS b USING (issue_id))
+              USING (comment_id)
+          WHERE c.comment_id = 9876;
+        UNION
+          SELECT f.issue_id, f.description, NULL AS version_affected, f.sponsor
+          FROM Comments AS c
+            JOIN (FeaturesComments JOIN FeatureRequests AS f USING (issue_id))
+              USING (comment_id)
+          WHERE c.comment_id = 9876;
+        ```
+
+      - (2) COALESCE()
+        - COALESCE()는 처음으로 NULL이 아닌 값을 지닌 인자 리턴
+          - 예제 실습: [SQL확인](https://www.w3schools.com/sql/trysqlserver.asp?filename=trysql_func_sqlserver_coalesce2)
+
+          ```SQL
+          SELECT
+            COALESCE(NULL, 1, 2) as a
+            , COALESCE(NULL, 2, 1) as b;
+            -- a:1, b:2 리턴
+          ```
+
+          - Bugs 관계 댓글은 모든 FeatureRequests 칼럼 데이터가 NULL
+          - FeatureRequests 관계 댓글은 모든 Bugs 칼럼 데이터가 NULL
+          - 부모테이블에 없는 칼럼은 NULL 
+          - COALESCE() 내 동일한 테이블 순서 필요 (Bugs, FeatureRequests)
+        -
+
+        ```SQL
+        SELECT c.*,
+          COALESCE(b.issue_id, f.issue_id ) AS issue_id,
+          COALESCE(b.description, f.description) AS description,
+          COALESCE(b.reporter, f.reporter ) AS reporter,
+          COALESCE(b.priority, f.priority ) AS priority,
+          COALESCE(b.status, f.status ) AS status,
+          b.severity,          -- FeatureRequests 출력시 NULL
+          b.version_affected,  -- FeatureRequests 출력시 NULL
+          f.sponsor            -- Bugs 출력시 NULL
+        FROM Comments AS c
+          LEFT OUTER JOIN (BugsComments JOIN Bugs AS b USING (issue_id))
+            USING (comment_id)
+          LEFT OUTER JOIN (FeaturesComments JOIN FeatureRequests AS f USING (issue_id))
+            USING (comment_id)
+        WHERE c.comment_id = 9876;  -- c.comment_id는 PK로 유일값
+        ```
+
+  - [2] 공통 수퍼테이블 생성
+    - 객체지향 다형성은 서브타입이 공통 수퍼타입을 공유해 두 서브타입을 비슷하게 참조 가능
+    - 조상 테이블을 사용하면 FK를 통해 데이터베이스 정합성을 강제할
+    - 베이스 테이블(base table) 생성해 다형성 연관 안티피턴에 없는 공통 수퍼타입 대응
+      - 모든 부모 테이블이 베이스 테이블(base table) 상속
+      - 자식 테이블(Comments)에도 베이스 테이블 참조 FK추가(issue_id 칼럼 불필요)
+      - **베이스 테이블(조상 테이블) 사용으로 FK 통해 DB 정합성 강제 가능**
+      - ERD  
+        ![01-07-다형성연관-베이스테이블연관](./img/01-07-다형성연관-베이스테이블연관.PNG)
+
+      - SQL
+        - Bugs와 FeatureRequests의 issue_id 칼럼은 PK인 동시에 FK
+        - issue_id는 Issues 테이블의 PK 참조
+
+        ```SQL
+        CREATE TABLE Issues (
+          issue_id SERIAL PRIMARY KEY
+        );
+        CREATE TABLE Bugs (
+          issue_id BIGINT UNSIGNED PRIMARY KEY,
+          FOREIGN KEY (issue_id) REFERENCES Issues(issue_id),
+          ...
+        );
+        CREATE TABLE FeatureRequests (
+          issue_id BIGINT UNSIGNED PRIMARY KEY,
+          FOREIGN KEY (issue_id) REFERENCES Issues(issue_id),
+          ...
+        );
+        CREATE TABLE Comments (
+          comment_id SERIAL PRIMARY KEY,
+          issue_id BIGINT UNSIGNED NOT NULL,
+          author BIGINT UNSIGNED NOT NULL,
+          comment_date DATETIME,
+          comment TEXT,
+          FOREIGN KEY (issue_id) REFERENCES Issues(issue_id),
+          FOREIGN KEY (author) REFERENCES Accounts(account_id),
+        );
+        ```
+
+        - Issues 테이블에 속성이 없다면 쿼리에 추가 불필요
+        - Comments는 Bugs 또는 FeatureRequests와 직접 조인 가능 (Issues PK 이용)
+
+        ```SQL
+        -- 두 테이블 조인
+        SELECT *
+        FROM Comments AS c
+          LEFT OUTER JOIN Bugs AS b USING (issue_id)
+          LEFT OUTER JOIN FeatureRequests AS f USING (issue_id)
+        WHERE c.comment_id = 9876;
+
+        -- 특정 버그 관련 댓글 조회
+        SELECT *
+        FROM Bugs AS b
+          JOIN Comments AS c USING (issue_id)
+        WHERE b.issue_id = 1234;
+        ```
+
+  > 모든 테이블 관계에는 참조하는 테이블 하나, 참조되는 테이블 하나가 있음
+
 ---
 
 ### 형식
