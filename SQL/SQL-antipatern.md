@@ -458,7 +458,7 @@
       - 칼럼입력을 NOT NULL로 강제 불가
       - 행에 대한 입력 강제이기에 애플리케이션 코드 작성 필요
     - SQL 데이터 타입 사용 불가
-      - DATE, INT 등 상제 불가
+      - DATE, INT 등 강제 불가
     - 참조 정합성 강제 불가
       - 색인 테이블에 대한 FK정의로 입력 범위 제한 불가
 
@@ -469,13 +469,16 @@
     - 속성 이름 강제 불가
       - 같은 의미 데이터를 date_reported 혹은 report_date로 저장 가능
       - 서브 커리로 집계 가능하나 이도 불확실
-      - attr_name칼럼이 칼럼명 테이블을 참조하는 FK제약 가능하나, 속성명 추가제한 발생
+      - attr_name칼럼이 칼럼명 테이블을 참조하는 FK제약 가능하나,
+        - 아무때나 속성 추가 가능한 EAV의 기능 상실
 
         ```SQL
         SELECT date_reported, COUNT(*) AS bugs_per_date
-        FROM (SELECT DISTINCT issue_id, attr_value AS date_reported
-        FROM IssueAttributes
-        WHERE attr_name IN ('date_reported', 'report_date'))
+        FROM (
+          SELECT DISTINCT issue_id, attr_value AS date_reported
+          FROM IssueAttributes
+          WHERE attr_name IN ('date_reported', 'report_date')
+        )
         GROUP BY date_reported;
         ```
 
@@ -500,7 +503,8 @@
       WHERE i.issue_id = 1234;
       ```
 
-    - CASE문 사용시 여러 조인 없이 가능하나, 모든 칼럼명 파악과 복잡 쿼리 문제가 남음
+    - CASE문 사용시 여러 조인 없이 가능하나,
+      - 모든 칼럼명을 파악해야 하고 복잡 쿼리 문제도 남음
 
       ```SQL
       SELECT issue_id, MAX(date_reported), MAX(status), MAX(priority), MAX(description)
@@ -529,7 +533,7 @@
 - 안티패턴 사용이 합당한 경우
   - 관계형DB에서 EAV 안티패턴을 합리화하기 어려움
   - 동적 속성을 지원하는 일부 애플리케이션에서는 필요
-    - 애플리케이션엣서 동적 속성이 필요한 테이블은 최대 2-3개
+    - 애플리케이션에서 동적 속성이 필요한 테이블은 최대 2-3개
     - 숙련 DB컨설턴트는 EAV시스템이 1년 내 다루기 어려워진다 함
   - 비관계형 데이터 관리가 필요하다면 비관계형 기술을 사용
     - Berkeley DB: 키-값(key-value)저장소
@@ -597,7 +601,7 @@
         ```
 
     - 단점
-      - 서브타입 속성 테이블을 보고 고옹 속성 파악 어려움
+      - 서브타입 속성 테이블을 보고 공통 속성 파악 어려움
       - 공통 속성 추가시 모든 서브타입 테이블 변경 필요
       - 객체와 저장 서브타입 테이블에 관한 메타데이터 부재로 관계 파악 어려움
       - 서브타입 상관없이 모든 객체 보기 복잡(UNION으로 묶은 뷰 필요)
