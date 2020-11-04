@@ -416,6 +416,8 @@
     - 여러 테이블 변경 위해 데이블 잠금 불필요
     - 고아 데이터 정정 위해 품질 제어 스크립트 실행 불필요
   - FK는 쉬운 사용, 성능 향상, 참조 정합성 유지의 장점이 있다
+  > 개발 단계에서는 FK를 없이, 검증에서 FK를 설정  
+    개발에서 유연성을 보장하고, 검증부터 데이터 정합성 보장
 
 ---
 
@@ -952,7 +954,8 @@
 
         ```SQL
         CREATE TABLE Issues (
-          issue_id SERIAL PRIMARY KEY
+          issue_id SERIAL PRIMARY KEY,
+          issue_type VARCHAR(100) NOT NULL -- 승엽's tip
         );
         CREATE TABLE Bugs (
           issue_id BIGINT UNSIGNED PRIMARY KEY,
