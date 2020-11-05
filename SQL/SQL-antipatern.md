@@ -1000,6 +1000,89 @@
 
 ---
 
+### 다중 칼럼 속성
+
+- 목표: 다중 값 속성 저장
+  - 버그에 태그를 사용해 분류 추가
+  - 태그는 여러개를 달 수 있고, 전혀 다른 종류도 달 수 있음
+
+- 안티패턴: 여러 개의 칼럼 생성
+  - 태그 칼럼 3개를 만들고 각 칼럼에 하나의 태그를 저장
+
+    ```SQL
+    CREATE TABLE Bugs (
+      bug_id SERIAL PRIMARY KEY,
+      description VARCHAR(1000),
+      tag1 VARCHAR(20),
+      tag2 VARCHAR(20),
+      tag3 VARCHAR(20)
+    );
+    ```
+
+  - 값 검색
+    - 주어진 태그를 가진 버그를 찾으려면 모든 칼럼을 확인해야 함
+    - 예: performance와 printing 두 태그를 모두 가진 버그
+
+      ```SQL
+      SELECT * FROM Bugs
+      WHERE 'performance' IN (tag1, tag2, tag3)
+        AND 'printing' IN (tag1, tag2, tag3);
+      ```
+
+  - 값 추가와 삭제
+    - 추가
+      - 어떤 칼럼이 NULL인지 조회 후 UPDATE
+    - 삭제
+      - 다른 클라이언트가 동시에 업데이트하면 변경 내용이 덮어쓰이는 문제 발생
+      - NULLIF()함수 활용: 두 인수 값이 같을 때 NULL 리턴(SQL 표준 함수)
+
+        ```SQL
+        UPDATE Bugs
+        SET tag1 = NULLIF(tag1, 'performance'),
+          tag2 = NULLIF(tag2, 'performance'),
+          tag3 = NULLIF(tag3, 'performance')
+        WHERE bug_id = 3456;
+        ```
+
+      - 세 칼럼 모두 태그를 갖고 있을 시, 변경 없는 복잡한 SQL
+
+        ```SQL
+        UPDATE Bugs
+        SET tag1 = CASE
+            WHEN 'performance' IN (tag2, tag3) THEN tag1
+            ELSE COALESCE(tag1, 'performance') END,
+          tag2 = CASE
+            WHEN 'performance' IN (tag1, tag3) THEN tag2
+            ELSE COALESCE(tag2, 'performance') END,
+          tag3 = CASE
+            WHEN 'performance' IN (tag1, tag2) THEN tag3
+            ELSE COALESCE(tag3, 'performance') END
+        WHERE bug_id = 3456;
+        ```
+
+  - 유일성 보장
+    - 동일한 값의 insert를 방지 못함
+
+      ```SQL
+      INSERT INTO Bugs (description, tag1, tag2)
+        VALUES ('printing is slow', 'performance', 'performance');
+      ```
+
+  - 값의 수 증가 처리
+    - 칼럼 수의 3개를 넘는 태그 저장 불가
+    - 필요에 따라 칼럼을 추가하는 방법은 비용이 큼
+      - 테이블 구조 변경은 테이블 전체 잠궈 클라이언스 접근 차단 발생
+      - 예전 테이블 데이터를 새 테이블에 복사이동 한다면 시간적 비용 발생
+      - 추가된 칼럼을 지원하도록 애플리케이션의 모든 SQL 수정 필요
+
+- 안티패턴 인식 방법
+  - 
+- 안티패턴 사용이 합당한 경우
+  - 
+- 해법
+  - 
+---
+
 ### 형식
 
 - 목표: 
