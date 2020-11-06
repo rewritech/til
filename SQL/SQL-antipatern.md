@@ -1083,6 +1083,22 @@
   - 속성 선택의 위치나 순서가 중요한 경우
     - 칼럼의 의미와 사용처가 논리적으로 다른 속성
 
+- 해법: 종속 테이블 생성
+  - 무당횡단 안티패턴의 해답과 유사
+  - 여러 개의 값을 여러 칼럼 대신 행에 저장
+    - bug_id와 tag를 PK로 설정해 유일성 보장 
+
+    ```SQL
+    CREATE TABLE Tags (
+      bug_id BIGINT UNSIGNED NOT NULL
+      tag VARCHAR(20),
+      PRIMARY KEY (bug_id, tag),
+      FOREIGN KEY (bug_id) REFERENCES Bugs(bug_id)
+    );
+    ```
+
+  > 같은 의미를 가지는 각각의 값은 하나의 칼럼에 저장하라.
+
 ---
 
 ### 형식
