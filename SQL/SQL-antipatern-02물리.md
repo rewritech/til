@@ -70,7 +70,7 @@
         WHERE table_schema = 'bugtracker_schema'
           AND table_name = 'bugs'
           AND column_name = 'status';
-          -- 결과: ENUM(‘NEW’, ‘IN PROGRESS’, ‘FIXED’)
+          -- 결과: ENUM('NEW’, 'IN PROGRESS’, 'FIXED’)
         ```
 
   - 새로운 맛 추가하기
@@ -86,6 +86,7 @@
   
   - 포팅이 어렵다
     - CHECK제약조건, ENUM 등 지원이 모든 DB에서 동일하지 않음
+      - 제한하는 데이터 수가 DB마다 다름
     - 여러 DB 사용하는 경우 관리 어려움
 
 - 안티패턴 인식 방법
@@ -98,10 +99,45 @@
   - 예: LEFT/RIGHT, ACTIVE/INACTIVE, ON/OFF, INTERNAL/EXTERNAL
 
 - 해법: 데이터로 값을 지정하기
+  - 칼럼에 허용하는 데이터를 모은 색인 테이블 작성해 FK제약조건 설정
+
+    ```SQL
+    CREATE TABLE BugStatus (
+      status VARCHAR(20) PRIMARY KEY
+    );
+
+    INSERT INTO BugStatus (status)
+      VALUES ('NEW'), ('IN PROGRESS'), ('FIXED');
+
+    CREATE TABLE Bugs (
+      ...
+      status VARCHAR(20),
+      FOREIGN KEY (status) REFERENCES BugStatus(status)
+      ON UPDATE CASCADE
+    );
+    ```
+
   - 값의 집합 쿼리하기
+    - 색인 테이블 SELECT로 출력 가능
+    - 예상가능한 정렬 가능
+
   - 색인 테이블의 값 갱신하기
-  - 더 디상 사용하지 않는 값 지원하기
+    - 평범한 INSERT, DELETE, UPDATE문으로 갱신 가능
+    - DB 운영중에도 실시간 변경 가능
+    - 제약중인 현재 값을 알 필요 없음
+
+  - 더 이상 사용하지 않는 값 지원하기
+    - 더 이상 사용하지 않는 데이터는 active칼럼을 추가해 구분
+
+    ```SQL
+    -- 사용하는 값만 출력
+    SELECT status FROM BugStatus WHERE active = 'ACTIVE';
+    ```
+
   - 포팅이 쉽다
+    - 색인 테이블의 FK제약조건은 표준 SQL 기능만 사용
+    - 색인 테이블 내 관리 데이터 제한 없음
+
 ---
 
 ### 형식
