@@ -213,26 +213,92 @@
   - 인덱스는 DB 성능 향상에 가장 좋은 방법
 
 - 안티패턴: 무계획하게 인덱스 사용하기
-  - 추측으로 인덱스 성정시 발생하는 실수
-    - 인덱스가 불출분하거나 아예 없음
+  > 인덱스는 SQL표준이 아니므로 DB마다 공부해야하나 논리적 개념은 동일
+  - 추측으로 인덱스 설정시 발생하는 실수
+    - 인덱스가 불충분하거나 아예 없음
     - 인덱스가 너무 많거나 불필요한 정의가 생김
     - 어떤 인덱스도 도움이 될 수 없는 쿼리 실행
   - 없는 인덱스
+    - 인덱스 유지는 오버헤드가 있으나 그 이상의 이득이 존재
+    - 일반적인 애플리케이션은 한 데이터 업데이트 위해 수 많은 검색 필요
+    - 인덱스는 원하는 행을 빨리 찾으므로 업데이트와 삭제에 도움
   - 너무 많은 인덱스
+    - 사용되지 않은 인덱스는 아무 이득이 없다
+    - 대부분 DB는 PK에 자동으로 인덱스 설정
+      - PK칼럼에 인덱스 설정은 인덱스 중복으로 불필요한 오버헤드 발생
+    - 긴 문자열 타입에 대한 인덱스는 크다(오버헤드? 용량?)
+      - 보통 검색 및 정렬 대상이 아니다
+    - 복합 인덱스는 이점이 많으나, 중복 및 미사용 복합 인덱스는 불필요
+      - 검색 및 조인 조건, 정렬 순서에 맞춰 왼쪽부터 칼럼 나열
+    - 쿼리에 도움되는 인덱스를 모르면 모든 칼럼과 조합으로 인덱스 생성
+      - 엄청난 오버헤드 발생
   - 인덱스가 도움이 되지 않을 때
+    - 아무런 인덱스를 사용할 수 없는 쿼리 실행은 실수
+      - 홍 길동 이름검색에서 홍으로 찾는 것과 길동으로 찾는 차이
+    - 예
+
+      ```SQL
+      CREATE INDEX TelephonBook ON Accounts(last_name, first_name);
+      -- 복합 인덱스 순서와 반대
+      SELECT * FROM Account ORDER BY first_name, last_name;
+
+      -- 날짜는 연도로 시작, 월은 매년 있으므로 전 데이터 검색 필요
+      SELECT * FROM Account WHERE MONTH(birth) = 4;
+
+      -- 특정 이름을 가진 행 예측 불가
+      SELECT * FROM Account
+      WHERE first_name = 'Charles' OR last_name = 'Charles';
+
+      -- 성 검색에는 도움되지만, 이름 검색에는 도움이 안 됨
+      SELECT * FROM Account WHERE first_name = 'Charles';
+      UNION
+      SELECT * FROM Account WHERE last_name = 'Charles';
+
+      -- 모든 문자열 검사하므로 인덱스 이점 없음
+      SELECT * FROM Account WHERE first_name LIKE '%arl%';
+      ```
 
 - 안티패턴 인식 방법
   - 이게 내 쿼리인데 어떻게 빠르게 할 수 있을까
+    - 테이블 설명, 인덱스, 데이터 크기, 성능 측정, 최적화 등 내용이 필요
   - 모든 필드에 인덱스를 걸었는데 왜 안 빠르지?
   - 인덱스가 DB성능을 낮춘다고 들어서 아예 안 써
+  - 선택도(selectivity)가 낮은 인덱스
+    - 테이블의 전체 행 수와 인덱스에서 구별되는 항목의 수의 비율
+    - 구별되는 항목이 적으면, 인덱스는 비용만 들며 의미 없음
+
+    ```SQL
+    -- 데이터가 다양해야 인덱스의 이점을 누린다
+    SELECT COUNT(DISTINCT status) / COUNT(status) AS selectivity FROM BUGS
+    ```
 
 - 안티패턴 사용이 합당한 경우
   - 어떤 쿼리를 최적화하는 것이 중요한지 모르는 상태
   - 하지만 회적의 추측을 해야 함
 
 - 해법: 인덱스를 MENTOR하라
+  - DB 분석해 인덱스 생성 이점이 있는지 판단
+    - Measure, Explain, Nominate, Test, Optimize, Rebuild
   - 측정(Measure)
+    - 대부분의 DB는 SQL 실행시간 로그 남김(SQL Server Profiler)
+    - 많은 시간을 잡아먹는 쿼리 찾아서 집중 개선
+    - 자주 실행되는 쿼리 개선
+    - 쿼리 성능 측정 시, 쿼리 결과 캐싱 기능 비활성화 필요
+    - 애플리케이션 디플로이 후 프로파일링하면 좋음
+      - 다만, 오버헤드가 발생하니 측정 후 축소 및 비활성화 필요
   - 실행 계획 확인(Explain)
+    - 위의 측정으로 찾은 고비용 쿼리의 느린 이유 찾기
+    - 모든 DB는 옵티마이저(optimizer) 사용 분석결과를 리포트로 볼 수 있음
+      - 쿼리 실행 계획(QEP, query execution plan)이라 부름
+      - 쿼리 실행 계획 요청 문법
+        | 데이터베이스 제품 | 쿼리 실행 계획 요청 문법 |
+        |-|-|
+        | IBM DB2 | EXPLAIN, db2expln 명령, Visual Explain |
+        | Microsoft SQL Server|  SET SHOWPLAN_XML 또는 Display Execution Plan |
+        | MySQL | EXPLAIN |
+        | Oracle | EXPLAIN PLAN |
+        | PostgreSQL|  EXPLAIN |
+        | SQLite | EXPLAIN |
   - 지명(Nominate)
   - 테스트(Test)
   - 최적화(Optimize)
