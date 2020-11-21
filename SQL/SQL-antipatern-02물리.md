@@ -300,18 +300,48 @@
         | PostgreSQL|  EXPLAIN |
         | SQLite | EXPLAIN |
   - 지명(Nominate)
+    - 쿼리 추적통계정보로 인덱스 추천하는 DB 기능 존재
+      - IBM DB2 Design Advisor
+      - Microsoft SQL Server Database Engine Tuning Advisor
+      - MySQL Enterprise Query Analyzer
+      - Oracle Automatic SQL Tuning Advisor
+      - 오토메틱 어드바이저 없다면, DB문서 공부해 쿼리 실행 계획 리포트 해석
+    - 커버링 인덱스
+      - 결과에 불필요하지만 행 검색에 도움되는 칼럼에 인덱스 설정
+      - 전화번호부 예
+        - (이름, 전화번호)만 검색
+        - (이름, **페이지**, 전화번호) 검색
+      - 쿼리가 인덱스 구조 내 칼럼만 참조한다면, DB는 인덱스만 읽어 쿼리 결과 생성
+
+        ```SQL
+        CREATE INDEX BugCovering ON Bugs
+          (status, bug_id, date_reported, reported_by, summary);
+
+        SELECT status, bug_id, date_reported, summary
+        FROM Bugs WHERE status = 'OPEN';
+        ```
+
   - 테스트(Test)
+    - 작업 결과가 올바른지 확인하는 중요한 작업
+    - 상사에게 어필과 작업 정당화가 가능
+      - 인덱스 추가로 쿼리 성능을 42% 향상 시켰습니다.
   - 최적화(Optimize)
+    - 인덱스는 사용이 잦으니 캐시메모리에 보관해 디스크 보관 비교 수십배 성능 향상 가능
+    - DB크기와 가용 시스템 메모리 양 보고 캐시 메모리 설정
+    > SQL Server 한번 확인해보자
   - 재구성(Rebuild)
+    - 시간이 지나며 데이터 축적정도가 변하니, 주기적으로 인덱스 재정비 필요
+    - 테이블 변경, 데이터 양, 예상 향상도를 고려해 재정비 결정
+    - 인덱스 최대 활용법은 DB마다 다르기에 연구 필요
+      | 데이터베이스 제품 | 인덱스 정비 명령 |
+      | ---- | ---- |
+      | IBM DB2 | REBUILD INDEX |
+      | Microsoft SQL | Server ALTER INDEX … REORGANIZE,
+      | | ALTER INDEX … REBUILD, |
+      | |또는 DBCC DBREINDEX |
+      | MySQL | ANALYZE TABLE 또는 OPTIMIZE TABLE |
+      | Oracle | ALTER INDEX … REBUILD |
+      | PostgreSQL | VACUUM 또는 ANALYZE |
+      | SQLite | VACUUM |
 
   > 데이터를 알고, 쿼리를 알고, 인덱스를 MENTOR하라
-
----
-
-### 형식
-
-- 목표
-- 안티패턴
-- 안티패턴 인식 방법
-- 안티패턴 사용이 합당한 경우
-- 해법
