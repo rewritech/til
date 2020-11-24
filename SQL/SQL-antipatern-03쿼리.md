@@ -56,10 +56,48 @@
 
 - 해법: 유일한 값으로 NULL을 사용하라
   - 스칼라 수식에서의 NULL
+    |수식 |기대값 | 실제값| 이유 |
+    |-|-|-|-|
+    |NULL = 0 |TRUE | NULL |NULL은 0이 아니다.|
+    |NULL = 12345 |FALSE | NULL| 지정된 값이 모르는 값과 같은지 알 수 없다.
+    |NULL <> 12345 |TRUE | NULL| 또한 다른지도 알 수 없다.|
+    |NULL + 12345 |12345 | NULL| NULL은 0이 아니다.|
+    |NULL |'string'|'string' | NULL |NULL은 빈 문자열이 아니다.
+    |NULL = NULL |TRUE | NULL | 모르는 값과 모르는 값이 같은지 알 수 없다
+    |NULL <> NULL |FALSE | NULL | 또한 다른지도 알 수 없다.|
+
   - 불리언 수식에서의 NULL
+    - NULL은 true도 false도 아님
+    |수식 | 기대값 | 실제값 | 이유|
+    |NULL  AND TRUE | FALSE | NULL | NULL은 false가아니다.|
+    |NULL  AND FALSE | FALSE | FALSE | 어떤진리값이든 FALSE와 AND를하면 false다|
+    |NULL  OR FALSE | FALSE | NULL | NULL은 false가아니다.|
+    |NULL  OR TRUE | TRUE | TRUE | 어떤진리값이든 TRUE와 OR를하면 true다|
+    |NOT (NULL) | TRUE | NULL | NULL은 false가아니다.|
+
   - NULL 검색하기
+    - IS NULL
+    - IS NOT NULL
+
+    ```SQL
+    -- DB제품에 따라 IS DISTINCT 제공
+    SELECT * FROM Bugs WHERE assigned_to IS NULL OR assigned_to <> 1;
+    SELECT * FROM Bugs WHERE assigned_to IS DISTINCT FROM 1; -- 위와 동일
+    ```
+
   - 칼럼을 NOT NULL로 선언하기
+    - NULL이 의미 없거나 금지인 경우에 사용
+
   - 동적 디폴트
+    - COALESCE()사용해 NULL이 아닌 값 리턴 이용
+
+    ```SQL
+    SELECT
+      first_name
+      || COALESCE(' ' || middle_initial || ' ', ' ')
+      || last_name AS full_name
+      FROM Accounts;
+    ```
 
 > 어떤 데이터 타입에 대해서든 누락된 값을 뜻하는 데는 NULL을 사용하라.
 
