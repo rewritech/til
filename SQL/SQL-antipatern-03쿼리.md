@@ -103,6 +103,114 @@
 
 ---
 
+### 애매한 그룹
+
+- 목표: 그룹당 최댓값을 가진 행 얻기
+  - 그룹의 최댓값 및 대강 값을 찾은 행의 다른 속성도 포함하는 쿼리 작성
+
+- 안티패턴: 그룹되지 않은 칼럼 참조
+  - 단일 값 규칙(아래 두 쿼리의 그룹은 다름)
+
+  ```sql
+  SELECT product_id, MAX(date_reported) AS latest
+  FROM Bugs JOIN BugsProducts USING (bug_id)
+  GROUP BY product_id;
+
+  SELECT product_id, MAX(date_reported) AS latest, bug_id
+  FROM Bugs JOIN BugsProducts USING (bug_id)
+  GROUP BY product_id;
+  ```
+
+  - 내 뜻대로 동작하는 쿼리
+    - 특정 칼럼 최댓값을 취득 쿼리가 다른 칼럼 값도 최댓값이라는 착각
+      - 두 데이터의 date칼럼이 동일한 최댓값일 경우, 최댓값 id는?
+      - MAX()와 MIN()을 동시에 사용할 경우 id는?
+      - AVG(), SUM() 등 집계 함수 리턴 값과 매치되는 행이 없는 경우 id는?
+
+- 안티패턴 인식 방법
+  - 단일 값 규칙 위반 쿼리에 대해 DB에러 발생
+
+- 안티패턴 사용이 합당한 경우
+  - MtSQL과 SQLite 경우, PK-FK관계에서 제한적 사용 가능
+  - 허나, 개인 판단으로는 사용이 합당한 경우는 없다.
+
+- 해법: 칼럼을 모호하게 사용하지 않기
+  - 함수 종속인 칼럼만 쿼리하기
+    - 모호한 칼럼 SELECT에서 제거
+
+  - 상호 연관된 서브쿼리 사용하기
+    - 서브쿼리 및 조인으로 검색(성능 안 좋음)
+    ```SQL
+    SELECT bp1.product_id, b1.date_reported AS latest, b1.bug_id
+    FROM Bugs b1
+    JOIN BugsProducts bp1 USING (bug_id)
+    WHERE NOT EXISTS ( -- EXISTS공부 필요
+      SELECT * FROM Bugs b2
+      JOIN BugsProducts bp2 USING (bug_id)
+      WHERE
+        bp1.product_id = bp2.product_id
+        AND b1.date_reported < b2.date_reported
+    );
+    ```
+
+  - 유도 테이블 사용하기(성능 안 좋음)
+    - 유도 테이블(derived table) 사용해 조인
+    - 확장적응성이 좋은 대안
+    ```sql
+    SELECT m.product_id, m.latest, b1.bug_id
+    FROM Bugs b1 JOIN BugsProducts bp1 USING (bug_id)
+    JOIN (
+      SELECT bp2.product_id, MAX(b2.date_reported) AS latest -- MAX()가 동일한 데이터가 있으면?
+      FROM Bugs b2 JOIN BugsProducts bp2 USING (bug_id)
+      GROUP BY bp2.product_id
+    ) m
+    ON (bp1.product_id = m.product_id AND b1.date_reported = m.latest);
+    ```
+
+  - 조인 사용하기(이해 난이도 높음)
+    - 확장적응성이 뛰어남
+    ```SQL
+    SELECT bp1.product_id, b1.date_reported AS latest, b1.bug_id
+    FROM Bugs AS b1
+    JOIN BugsProduct AS bp1
+      ON (b1.bug_id = bp1.bug_id)
+    LEFT OUTER JOIN (
+      Bugs AS b2
+      JOIN BugsProducts AS bp2
+        ON (b2.bug_id = bp2.bug_id)
+    )
+    ON (
+      bp1.product_id = bp2.product_id
+      AND (
+        b1.date_reported < b2.date_reported
+        OR b1.date_reported = b2.date_reported AND b1.bug_id < b2.bug_id
+      )
+    )
+    WHERE b2.bug_id IS NULL;
+    ```
+
+  - 다른 칼럼에 집계 함수 사용하기
+    - bug_id가 크면 보고순서가 나중일 경우
+    ```sql
+    SELECT product_id, MAX(date_reported) AS latest, MAX(bug_id) AS latest_bug_id
+    FROM Bugs JOIN BugsProducts USING (bug_id)
+    GROUP BY product_id;
+    ```
+
+  - 각 그룹에 대해 모든 값을 연결하기
+    - MySQL, SQLite에서 GROUP_CONCAT()함수 제공
+      - 쉼표로 구분된 문자열 만듬
+      - SQL표준 아님
+      - 어떤 bug_id가 최신인지 알 수 없음
+        |product_id| latest| bug_id_list|
+        |-|-|-|-|
+        |1| 2010-06-01| 1234, 2248|
+        |2| 2010-02-16| 3456, 4077, 5150|
+
+> 모호한 쿼리 결과를 피하기 위해 단일 값 규칙을 따라라.
+
+---
+
 ### 형식
 
 - 목표
