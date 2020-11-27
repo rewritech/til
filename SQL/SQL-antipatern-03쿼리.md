@@ -217,17 +217,86 @@
   - 애플리케이션에 모든 데이터 읽어 샘플 선정보다 DB샘플 검색이 유리
 
 - 안티패턴: 데이터를 임의로 정렬하기
+  - 임의로 정렬한 후 첫 행 고르기
+    ```sql
+    SELECT * FROM Bugs ORDER BY RAND() LIMIT 1;
+    ```
+    - 인덱스 사용 불가, 데이터 많은 경우 정렬이 매우 느려짐
+    - 첫 행 뒤에 수많은 행은 의미가 없으나, 임의의 값 선택위한 정렬로 성능 저하
 
 - 안티패턴 인식 방법
+  - SQL에서 임의의 행 리턴은 정말 느려
+  - 임의의 행 선택위해 모든 행을 가져와야 하는데, 애플리케이션 사용 메모이 어떻게 늘리지?
+  - 어떤 항목이 자주 나오는 거 같은데? 랜덤 같지 않아
 
 - 안티패턴 사용이 합당한 경우
+  - 데이터 집합이 적을 경우
+    - 예: 미국 50개 주 중 임의의 하나 고르기
+    - 데이터도 적고, 늘어날 가능성도 적음
 
 - 해법: 테이블 전체 정렬 피하기
   - 1과 max 사이에서 임의의 키 값 고르기
-  - 다음으로 큰 기 값 고르기
-  - 모든 키 값의 목록을 구한 다음, 임의로 하나 고르니
+    - PK값이 1부터 빈 값 없이 연속으로 존재할 경우
+    ```sql
+    SELECT * FROM Bugs
+    WHERE bug_id = (
+      SELECT CEIL(RAND() * MAX(bug_id)) FROM Bugs
+      -- SQL Server: CEILING(RAND() * MAX(bug_id))
+      -- CEIL: Return the smallest integer value
+    );
+    ```
+
+  - 다음으로 큰 키 값 고르기
+    - 1과 최댓값 사이에 빈틈이 있는 경우 사용 가능
+      - 단점: 빈 공간 바로 위의 숫자가 비교적 자주 선택됨
+      - 빈틈이 드물며, 동일한 빈도 선택이 덜 중요시 좋음
+      ```sql
+      SELECT b1.*
+      FROM Bugs AS b1
+      WHERE b1.bug_id >= (
+        SELECT CEIL(RAND() * (SELECT MAX(bug_id) FROM Bugs)
+      )
+      ORDER BY b1.bug_id
+      LIMIT 1;
+      ```
+
+  - 모든 키 값의 목록을 구한 다음, 임의로 하나 고르기
+    - 애플리케이션 코드로 DB 모든 키 값 읽고, 랜덤으로 하나 선택
+    - 테이블 정렬을 히파고, 각 키 값을 거의 같은 확률로 선택 가능
+    - 단점
+      - 모든 키 값을 가져오니 크기가 큼(메모리 자원을 넘을 수 있음)
+      - 쿼리를 두 번 해야 함(PK목록 생성, 임의의 행 선택)
+      - 쿼리가 복잡하고 비용이 크다면 부적합
+    - 추천
+      - 결과 집합 크기가 적당하며, 임의의 행 선택 쿼리가 단순
+      - 불연속적인 목록에서 값 선택할 경우
+
   - 오프셋을 이용해 임의로 고르기
-  - 벤터 종속적인 방법
+    1. DB 행 개수를 센다 COUNT(*)
+    1. 0과 COUNT(*) 사이 임의의 수 고름
+    1. 쿼리 오프셋으로 사용
+    ```SQL
+    SELECT * FROM Bugs LIMIT 1 OFFSET :offset
+    ```
+    - LIMIT: MySQL, PostgreSQL, SQLite
+    - ROW_NUMBER(): Oracle, Microsoft SQL Server, IBM DB2
+    - 키 값이 비연속적이며, 각 행 선택 확률을 같게 하는 경우 사용
+
+  - 벤더 종속적인 방법
+    - Microsoft SQL Server 2005: TABLESAMPLE
+      ```SQL
+      SELECT * FROM Bugs TABLESAMPLE (1 ROWS);
+      ```
+    - Oracle: SAMPLE
+      - 테이블에서 1% 행만 가져온 다음, 임의의 순서 정렬 후 한 행 리턴
+      ```SQL
+      SELECT * FROM (
+        SELECT *
+        FROM Bugs SAMPLE (1)
+        ORDER BY dbms_random.value
+      ) WHERE ROWNUM = 1;
+      ```
+    - DB제품 기능은 보통 제한이 있으므로 사용전 문서 확인 필수
 
 > 어떤 쿼리는 최적화할 수 없다. 이 경우에는 다른 접근방법을 취해야 한다.
 
