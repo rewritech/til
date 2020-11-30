@@ -323,12 +323,78 @@
 - 안티패턴 사용이 합당한 경우
   - 사용 빈도가 낮은 경우
 
-- 해법: 직업에 맞는 올바름 도구 사용하기
-  - 벤더 확장기능
+- 해법: 직업에 맞는 올바른 도구 사용하기
+  - 벤더 확장기능 사용(상세 내용은 문서 확인 필요)
     - MySQL에서의 전체 텍스트 검색
+      ```sql
+      ALTER TABLE Bugs ADD FULLTEXT INDEX bugfts (summary, description);
+      SELECT * FROM Bugs WHERE MATCH(summary, description) AGAINST ('crash');
+      SELECT * FROM Bugs WHERE MATCH(summary, description) AGAINST ('+crash -save' IN BOOLEAN MODE);
+      ```
+
     - Oracle에서의 텍스트 인덱싱
+      - CONTEXT
+        - 한 텍스트 칼럼에 이 인덱스 설정
+        - 인덱스를 주기적으로 재구성(rebuild)해줘야 함
+        ```sql
+        CREATE INDEX BugsText ON Bugs(summary) INDEXTYPE IS CTSSYS.CONTEXT;
+        SELECT * FROM Bugs WHERE CONTAINS(summary, 'crash') > 0;
+        ```
+
+      - CTXCAT
+        - 동일 테이블 다른 칼럼 함께 사용 특화
+        - 테이블 데이터가 변경에도 일관적 상태 유지하는 인덱스
+        ```sql
+        CTX_DDL.CREATE_INDEX_SET('BugsCatalogSet');
+        CTX_DDL.ADD_INDEX('BugsCatalogSet', 'status');
+        CTX_DDL.ADD_INDEX('BugsCatalogSet', 'priority');
+        CREATE INDEX BugsCatalog ON Bugs(summary)
+          INDEXTYPE IS CTSSYS.CTXCAT
+          PARAMETERS('BugsCatalogSet');
+
+        SELECT * FROM Bugs WHERE CATSEARCH(summary, '(crash save)', 'status = “NEW“') > 0;
+        ```
+
+      - CTXXPATH
+        - XML 문서 검색 특화
+        ```sql
+        CREATE INDEX BugTestXml ON Bugs(testoutput) INDEXTYPE IS CTSSYS.CTXXPATH;
+        SELECT * FROM Bugs
+        WHERE testoutput.existsNode('/testsuite/test[@status="fail"]') > 0;
+        ```
+
+      - CTXRULE
+        - 문서를 분석해 분류하는 규칙을 설계할 수 있음
+        - 이 예제는 이책의 범위를 넘음
+
     - MS MQL에서의 전체 텍스트 검색
+      - 먼저 전체 텍스트 기능을 활성화하고, 데이터베이스에 카탈로그를 정의
+      ```
+      EXEC sp_fulltext_database 'enable'
+      EXEC sp_fulltext_catalog 'BugsCatalog', 'create'
+      ```
+      - Bugs 테이블 전체 텍스트 인덱스 정의, 인덱스에 칼럼 추가, 인덱스 활성화
+      ```
+      EXEC sp_fulltext_table 'Bugs', 'create', 'BugsCatalog', 'bug_id'
+      EXEC sp_fulltext_column 'Bugs', 'summary', 'add', '2057'
+      EXEC sp_fulltext_column 'Bugs', 'description', 'add', '2057'
+      EXEC sp_fulltext_table 'Bugs', 'activate'
+      ```
+      - 전체 텍스트 인덱스 자동 동기화 기능 활성화
+      - 인덱스 칼럼 데이터 변경 내용이 인덱스에 전달
+      - 인덱스 띄울 프로세스 시작
+      ```
+      EXEC sp_fulltext_table 'Bugs', 'start_change_tracking'
+      EXEC sp_fulltext_table 'Bugs', 'start_background_updateindex'
+      EXEC sp_fulltext_table 'Bugs', 'start_full'
+      ```
+      - CONTAINS() 연산자를 사용
+      ```sql
+      SELECT * FROM Bugs WHERE CONTAINS(summary, '"crash"');
+      ```
     - PostgreSQL에서의 전체 텍스트 검색
+      - TSVECTOR 데이터 타입 칼럼 생성 후, 인덱스 생성
+
   - 서드파티 검색 엔진
   - 직접 만들기
 
