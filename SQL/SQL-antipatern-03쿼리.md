@@ -348,11 +348,12 @@
         CTX_DDL.CREATE_INDEX_SET('BugsCatalogSet');
         CTX_DDL.ADD_INDEX('BugsCatalogSet', 'status');
         CTX_DDL.ADD_INDEX('BugsCatalogSet', 'priority');
+
         CREATE INDEX BugsCatalog ON Bugs(summary)
           INDEXTYPE IS CTSSYS.CTXCAT
           PARAMETERS('BugsCatalogSet');
 
-        SELECT * FROM Bugs WHERE CATSEARCH(summary, '(crash save)', 'status = “NEW“') > 0;
+        SELECT * FROM Bugs WHERE CATSEARCH(summary, '(crash save)', 'status = "NEW"') > 0;
         ```
 
       - CTXXPATH
@@ -369,29 +370,29 @@
 
     - MS MQL에서의 전체 텍스트 검색
       - 먼저 전체 텍스트 기능을 활성화하고, 데이터베이스에 카탈로그를 정의
-      ```
-      EXEC sp_fulltext_database 'enable'
-      EXEC sp_fulltext_catalog 'BugsCatalog', 'create'
-      ```
+        ```
+        EXEC sp_fulltext_database 'enable'
+        EXEC sp_fulltext_catalog 'BugsCatalog', 'create'
+        ```
       - Bugs 테이블 전체 텍스트 인덱스 정의, 인덱스에 칼럼 추가, 인덱스 활성화
-      ```
-      EXEC sp_fulltext_table 'Bugs', 'create', 'BugsCatalog', 'bug_id'
-      EXEC sp_fulltext_column 'Bugs', 'summary', 'add', '2057'
-      EXEC sp_fulltext_column 'Bugs', 'description', 'add', '2057'
-      EXEC sp_fulltext_table 'Bugs', 'activate'
-      ```
+        ```
+        EXEC sp_fulltext_table 'Bugs', 'create', 'BugsCatalog', 'bug_id'
+        EXEC sp_fulltext_column 'Bugs', 'summary', 'add', '2057'
+        EXEC sp_fulltext_column 'Bugs', 'description', 'add', '2057'
+        EXEC sp_fulltext_table 'Bugs', 'activate'
+        ```
       - 전체 텍스트 인덱스 자동 동기화 기능 활성화
       - 인덱스 칼럼 데이터 변경 내용이 인덱스에 전달
       - 인덱스 띄울 프로세스 시작
-      ```
-      EXEC sp_fulltext_table 'Bugs', 'start_change_tracking'
-      EXEC sp_fulltext_table 'Bugs', 'start_background_updateindex'
-      EXEC sp_fulltext_table 'Bugs', 'start_full'
-      ```
-      - CONTAINS() 연산자를 사용
-      ```sql
-      SELECT * FROM Bugs WHERE CONTAINS(summary, '"crash"');
-      ```
+        ```
+        EXEC sp_fulltext_table 'Bugs', 'start_change_tracking'
+        EXEC sp_fulltext_table 'Bugs', 'start_background_updateindex'
+        EXEC sp_fulltext_table 'Bugs', 'start_full'
+        ```
+      - CONTAINS() 연산자 사용
+        ```sql
+        SELECT * FROM Bugs WHERE CONTAINS(summary, '"crash"');
+        ```
     - PostgreSQL에서의 전체 텍스트 검색
       - TSVECTOR 데이터 타입 칼럼 생성 후, 인덱스 생성
 
