@@ -393,10 +393,45 @@
         ```sql
         SELECT * FROM Bugs WHERE CONTAINS(summary, '"crash"');
         ```
+
     - PostgreSQL에서의 전체 텍스트 검색
-      - TSVECTOR 데이터 타입 칼럼 생성 후, 인덱스 생성
+      - TSVECTOR 데이터 타입 칼럼 생성 후
+      - TSVECTOR 칼럼 동가화용 트리거 설정
+      - GIN 인덱스 생성
+      - @@ 연산자로 검색
+        ```sql
+        CREATE TABLE Bugs (
+          bug_id SERIAL PRIMARY KEY,
+          summary VARCHAR(80),
+          description TEXT,
+          ts_bugtext TSVECTOR
+          ...
+        );
+
+        CREATE TRIGGER ts_bugtext BEFORE INSERT OR UPDATE ON Bugs
+        FOR EACH ROW EXECUTE PROCEDURE
+        tsvector_update_trigger(ts_bugtext, 'pg_catalog.english', summary, description);
+
+        CREATE INDEX bugs_ts ON Bugs USING GIN(ts_bugtext);
+
+        SELECT * FROM Bugs WHERE ts_bugtext @@ to_tsquery('crash');
+        ```
+
+    - SQLite
+      - 생략
 
   - 서드파티 검색 엔진
+    - Sphinx Search
+      - 오픈소스
+      - MySQL, PostgreSQL와 잘 통합됨(다른 DB통합성 확인 필요)
+      - 인덱싱과 검색이 빠름
+      - 분산 쿼리 지원
+      - 업데이트가 드물고, 검색이 잦은 애플리케이션에 적합
+      - 실제 사용시 다시 공부하자
+    - Apache Lucene
+      - Java 애플리케이션용 검색엔진
+      - DB 행 수정, 삽입, 삭제에 따른 Lucene 인덱스 변경 필요
+
   - 직접 만들기
 
 > 모든 문제를 SQL로 풀어야 하는 것은 아니다
