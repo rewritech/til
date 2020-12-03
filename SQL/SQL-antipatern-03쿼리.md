@@ -432,7 +432,36 @@
       - Java 애플리케이션용 검색엔진
       - DB 행 수정, 삽입, 삭제에 따른 Lucene 인덱스 변경 필요
 
-  - 직접 만들기
+  - **직접 만들기**<트리거와 프로시져 공부후 다시 보자>
+    - 전치 인덱스(inverted index)
+      - 검색할 모든 단어의 목록
+      - 다대다 관계에서 인덱스는 단어들과 각 단어를 포함한 텍스트 항목을 연관 시킴
+    - 테이블 정의
+      - Keywords 테이블: 사용자가 검색할 키워드 목록
+      - BugsKeywords 테이블: 교차 테이블
+      - Bug의 설명 텍스트의 모든 매치 키워드 BugsKeywords에 추가
+        - 최초 등록 비용이 크나, 이후 검색은 빨라짐
+    - 저장 프로시저 작성
+      - 단어 검색 이력이 있다면, 해당 키워드의 문서 목록이 BugsKeywords에 존재하므로 쿼리가 빠름
+      - 검색 이력이 없는 키워드는 어려운 방법으로 텍스트 항목의 집합 검색 필요
+      ```sql
+      CREATE TABLE Keywords (
+        keyword_id SERIAL PRIMARY KEY,
+        keyword VARCHAR(40) NOT NULL,
+        UNIQUE KEY (keyword)
+      );
+
+      CREATE TABLE BugsKeywords (
+        keyword_id BIGINT UNSIGNED NOT NULL,
+        bug_id BIGINT UNSIGNED NOT NULL,
+        PRIMARY KEY (keyword_id, bug_id),
+        FOREIGN KEY (keyword_id) REFERENCES Keywords(keyword_id),
+        FOREIGN KEY (bug_id) REFERENCES Bugs(bug_id)
+      );
+      ```
+
+    - 프로시저와 트리거 공부 필요
+
 
 > 모든 문제를 SQL로 풀어야 하는 것은 아니다
 
