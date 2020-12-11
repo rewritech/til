@@ -43,6 +43,46 @@
       - 인증(authentication): 자신이 원하는 누구로든 인증
       - 신원확인(identification): 그 사람이 맞는지를 증명
 
+- 해법: 패스워드의 소금 친 해시 값을 저장
+  - 해시 함수 이해하기
+    - 입력 문자열을 해시로 변환해 문자열 길이조차 모르게 함
+    - 해시 값은 역으로 원래 입력 값 알기 어려움
+    - SHA-1, MD5(): 과거 인기 있었으나 해시 값에서 입력 문자 추론 가능
+    - SHA-256, SHA-384, SHA-512 이상 사용 권장
+  - SQL에서 해시 사용하기
+    - SHA-256 패스워드 해시 값 문자 길이는 항상 64(CHAR64 고정)
+    - MySql: 해시 값 리턴 함수 SHA2() 제공
+  - 해시에 소금 추가하기
+    - 공격자가 DB 접근시, [단어:해시] 사전 테이블 이용해 패스워드 탐색 가능
+      ```SQL
+      CREATE TABLE DictionaryHashes (
+        password VARCHAR(100),
+        password_hash CHAR(64)
+      );
+
+      SELECT a.account_name, h.password
+      FROM Accounts AS a
+      JOIN DictionaryHashes AS h
+        ON a.password_hash = h.password_hash;
+      ```
+    - 패스워드 뒤에 임의의 바이트를 덧붙여 해시 값 생성
+      - 인쇄불가능한 바이트도 가능
+      - 예
+        - 패스워드salt
+        - 패스워salt드
+        - 패스salt워드
+        - 패salt스워드
+        - salt패스워드
+        - salt패스salt워드salt
+      ```bash
+      SHA2('password') = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'
+      SHA2('password-0xT!sp9') = '7256d8d7741f740ee83ba7a9b30e7ac11fcd9dbd7a0147f4cc83c62dd6e0c45b'
+      ```
+  - SQL에서 패스워드 숨기기
+  - 패스워드 복구가 아닌 패스워드 재설정 사용하기
+
+> 당신이 패스워드를 읽을 수 있다면, 해커도 읽을 수 있다.
+
 ---
 
 ### 형식
