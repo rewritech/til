@@ -79,7 +79,44 @@
       SHA2('password-0xT!sp9') = '7256d8d7741f740ee83ba7a9b30e7ac11fcd9dbd7a0147f4cc83c62dd6e0c45b'
       ```
   - SQL에서 패스워드 숨기기
+    - 애플리케이션에서 입력을 계산해 해시 값 사용으로 노출 방지
+    - 애플리케이션에서 소금 값도 결합 
+    - 브라우저에서 애플리케이션 서버에는 패스워드를 평문으로 전달
+      - 브라우저에는 소금 값이 없어 해시값 생성 불가
+      - HTTPS 같은 보안 프로토콜 꼭 사용
   - 패스워드 복구가 아닌 패스워드 재설정 사용하기
+    - 임시 패스워드 발송
+      - 사용자 패스워드 발송 금지
+      - 짧은 시간 후 만료되는 임시 패스워드 발송
+      - 임시 패스워드 로그인 시 패스워드 변경 강제
+    - 패스워드 요청 아이디에 토큰 할당
+      - PasswordResetRequest 테이블 준비
+      - 패스워드 요청시 시간제한 토큰 할당
+        ```SQL
+        CREATE TABLE PasswordResetRequest (
+          token CHAR(32) PRIMARY KEY,
+          account_id BIGINT UNSIGNED NOT NULL,
+          expiration TIMESTAMP NOT NULL,
+          FOREIGN KEY (account_id) REFERENCES Accounts(account_id)
+        );
+
+        SET @token = MD5('billkarwin' || CURRENT_TIMESTAMP || RAND());
+
+        INSERT INTO PasswordResetRequest (token, account_id, expiration)
+        VALUES (@token, 123, CURRENT_TIMESTAMP + INTERVAL 1 HOUR);
+        ```
+      - 이메일, SMS 등으로 토큰 전달
+        ```
+        패스워드 재설정을 요청했습니다.
+        패스워드를 변경하려면 한 시간 이내에 아래 링크를 클릭하십시오.
+        http://www.example.com/reset_password?token=f5cabff22532bd0025118905bdea50da
+        ```
+      - url과 DB 토큰 비교 및 제한시간 확인
+        - 토큰 값에 해당하는 아이디는 유일함
+
+  - 아주 안전한 시스템 개발 시 고급 기술 활용
+    - [PBKDF2](http://tools.ietf.org/html/rfc2898): 널리 사용되는 키 강화 표준
+    - [Bcrypt](http://bcrypt.sourceforge.net): 적응성 해시 함수 구현
 
 > 당신이 패스워드를 읽을 수 있다면, 해커도 읽을 수 있다.
 
