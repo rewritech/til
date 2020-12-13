@@ -127,7 +127,19 @@
 - 목표: 동적 SQL 쿼리 작성하기
 - 안티패턴: 검증되지 않은 입력을 코드로 실행하기
   - 사고는 발생할 것이다
+    - 상품명이 Leader's Book인 경우, 쿼리 미실행
   - 최고의 웹 보안 위협
+    - 모든 계정의 비번 변경 등 악의적 SQL생성법 무수히 많음
+      - URL 파라미터로 설정
+      ```
+      http://bugs.example.com/setpass?password=xyzzy&userid=123 OR TRUE
+      ```
+      ```php
+      $password = $_REQUEST["password"];
+      $userid = $_REQUEST["userid"];
+      $sql = "UPDATE Accounts SET password_hash = SHA2('$password')
+      WHERE account_id = $userid";
+      ```
   - 치료를 위한 탐구
     - 값을 이스케이프하기
     - 쿼리 파라미터
