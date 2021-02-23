@@ -1,0 +1,9 @@
+Lessons
+- Leader
+    - [Codility](https://codility.com/media/train/6-Leader.pdf)
+- Maximum slice problem
+    - [Codility](https://codility.com/media/train/7-MaxSlice.pdf)
+    - [Korean Blog](https://m.blog.naver.com/PostView.nhn?blogId=1net1&logNo=221257545371&proxyReferer=https:%2F%2Fwww.google.com%2F)
+- Prime and composite numbers
+    - [Codility](https://codility.com/media/train/8-PrimeNumbers.pdf)
+    - [Korean Blog](https://velog.io/@ahj1592/Codility-10.-Prime-and-composite-number)
