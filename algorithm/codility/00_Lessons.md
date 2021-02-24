@@ -7,3 +7,6 @@ Lessons
 - Prime and composite numbers
     - [Codility](https://codility.com/media/train/8-PrimeNumbers.pdf)
     - [Korean Blog](https://velog.io/@ahj1592/Codility-10.-Prime-and-composite-number)
+---
+- Sieve of Eratosthenes
+    - [Codility](https://codility.com/media/train/9-Sieve.pdf)
