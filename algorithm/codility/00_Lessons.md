@@ -12,3 +12,7 @@ Lessons
     - [Codility](https://codility.com/media/train/9-Sieve.pdf)
 - Euclidean algorithm
     - [Codility](https://codility.com/media/train/10-Gcd.pdf)
+- 13 Faster algorithms for Fibonacci numbers
+    - [Codility](https://codility.com/media/train/11-Fibonacci.pdf)
+- 14 Binary search algorithm
+    - [Codility]https://codility.com/media/train/12-BinarySearch.pdf)
