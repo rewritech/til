@@ -10,3 +10,5 @@ Lessons
 ---
 - Sieve of Eratosthenes
     - [Codility](https://codility.com/media/train/9-Sieve.pdf)
+- Euclidean algorithm
+    - [Codility](https://codility.com/media/train/10-Gcd.pdf)
